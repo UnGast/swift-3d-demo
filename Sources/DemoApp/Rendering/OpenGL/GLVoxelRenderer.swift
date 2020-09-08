@@ -49,7 +49,43 @@ public struct GLVoxelRenderer {
 
         Vertex(DVec3(0.5, 0.5, 0.5), DVec3(0, 0, 1)),
 
-        Vertex(DVec3(-0.5, 0.5, 0.5), DVec3(0, 0, 1))
+        Vertex(DVec3(-0.5, 0.5, 0.5), DVec3(0, 0, 1)),
+
+        // right
+        Vertex(DVec3(0.5, -0.5, 0.5), DVec3(1, 0, 0)),
+
+        Vertex(DVec3(0.5, -0.5, -0.5), DVec3(1, 0, 0)),
+        
+        Vertex(DVec3(0.5, 0.5, -0.5), DVec3(1, 0, 0)),
+
+        Vertex(DVec3(0.5, 0.5, 0.5), DVec3(1, 0, 0)),
+
+        // bottom
+        Vertex(DVec3(-0.5, -0.5, -0.5), DVec3(0, -1, 0)),
+
+        Vertex(DVec3(0.5, -0.5, -0.5), DVec3(0, -1, 0)),
+
+        Vertex(DVec3(0.5, -0.5, 0.5), DVec3(0, -1, 0)),
+
+        Vertex(DVec3(-0.5, -0.5, 0.5), DVec3(0, -1, 0)),
+
+        // left
+        Vertex(DVec3(-0.5, -0.5, -0.5), DVec3(-1, 0, 0)),
+        
+        Vertex(DVec3(-0.5, -0.5, 0.5), DVec3(-1, 0, 0)),
+
+        Vertex(DVec3(-0.5, 0.5, 0.5), DVec3(-1, 0, 0)),
+
+        Vertex(DVec3(-0.5, 0.5, -0.5), DVec3(-1, 0, 0)),
+
+        // back
+        Vertex(DVec3(0.5, -0.5, -0.5), DVec3(0, 0, -1)),
+
+        Vertex(DVec3(-0.5, -0.5, -0.5), DVec3(0, 0, -1)),
+
+        Vertex(DVec3(-0.5, 0.5, -0.5), DVec3(0, 0, -1)),
+
+        Vertex(DVec3(0.5, 0.5, -0.5), DVec3(0, 0, -1))
     ]
 
     private static var indices: [GLMap.UInt] = [
@@ -62,7 +98,27 @@ public struct GLVoxelRenderer {
         // front
         4, 5, 6,
 
-        4, 6, 7
+        4, 6, 7,
+
+        // right
+        8, 9, 10,
+
+        8, 10, 11,
+
+        // bottom
+        12, 13, 14,
+
+        12, 14, 15,
+        
+        // left
+        16, 17, 18,
+
+        16, 18, 19,
+
+        // back
+        20, 21, 22,
+
+        20, 22, 23
     ]
 
     private static let worldTransformation = AnyMatrix4<GLMap.Float>([
@@ -127,7 +183,7 @@ public struct GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let axes = getAxes(pitch: 45, yaw: 45)
+        let axes = getAxes(pitch: -45, yaw: 45)
 
         let worldTransformation = AnyMatrix4<GLMap.Float>([
 
@@ -206,7 +262,7 @@ extension GLVoxelRenderer {
 
     void main() {
 
-        FragColor = dot(Normal, vec3(0, 1, 0)) * vec4(1.0, 1.0, 1.0, 1.0);
+        FragColor = vec4(dot(Normal, vec3(0, 1, 0)) * vec3(1.0, 1.0, 1.0), 1.0);
     }
     """
 }
