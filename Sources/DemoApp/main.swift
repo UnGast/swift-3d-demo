@@ -22,6 +22,8 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     lazy private var guiRoot: Root = buildGUI()
 
+    @Reference private var metaView: MetaView
+
     @Observable private var cameraPositionText = ""
 
     public init() {
@@ -58,32 +60,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func buildGUI() -> Root {
 
-        Root(rootWidget: Background(fill: Color(50, 70, 80, 200)) { [unowned self] in
-
-            Padding(all: 32) {
-
-                TextConfigProvider(fontSize: 24, fontWeight: .Bold, color: .White) {
-
-                    Column(spacing: 16) {
-                        
-                        Row {
-
-                            Text("Position:")
-                            
-                            ObservingBuilder($cameraPositionText) {
-                                
-                                Text(cameraPositionText)
-                            }
-                        }
-
-                        for voxel in scene.voxels {
-
-                            Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
-                        }
-                    }
-                }
-            }
-        })
+        Root(rootWidget: MetaView(scene).connect(ref: $metaView))
     }
 
     private func updateGUIBounds() {
@@ -95,9 +72,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func updateGUIContent() {
 
-        cameraPositionText = """
-        x: \(scene.camera.position.x, format: "%.2f") y: \(scene.camera.position.y, format: "%.2f") z: \(scene.camera.position.z, format: "%.2f")
-        """
+        metaView.update()
     }
 
     private func frame(_ deltaTime: Int) {
