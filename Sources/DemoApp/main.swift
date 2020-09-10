@@ -57,7 +57,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         _ = window.onResize { [unowned self] _ in updateGUIBounds() }
 
-        _ = window.onMouse { [unowned self] in guiRoot.consume($0) }
+        _ = window.onMouse(handleMouseEvent)
     }
 
     private func buildGUI() -> Root {
@@ -75,6 +75,28 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
     private func updateGUIContent() {
 
         metaView.update()
+    }
+
+    private func handleMouseEvent(_ event: RawMouseEvent) {
+
+        guiRoot.consume(event)
+
+        if let event = event as? RawMouseMoveEvent {
+            
+            scene.camera.yaw += event.move.x * 0.01
+
+            scene.camera.pitch += event.move.y * 0.01
+
+            if scene.camera.pitch > 90 {
+
+                scene.camera.pitch = 90
+            }
+
+            if scene.camera.pitch < -90 {
+
+                scene.camera.pitch = -90
+            }
+        }
     }
 
     private func frame(_ deltaTime: Int) {

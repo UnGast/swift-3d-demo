@@ -181,17 +181,6 @@ public struct GLVoxelRenderer {
         }
     }
 
-    private static func getAxes(pitch: Double, yaw: Double) -> (x: DVec3, y: DVec3, z: DVec3) {
-
-        let x = DVec3(x: 1, y: 0, z: tan(yaw))
-
-        let y = DVec3(x: 0, y: 1, z: tan(pitch)).normalized()
-
-        let z = DVec3(x: tan(yaw), y: tan(pitch), z: 1).normalized()
-
-        return (x, y, z)
-    }
-
     public static func render(voxels: [Voxel], camera: Camera) {
 
         shaderProgram.use()
@@ -200,15 +189,15 @@ public struct GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let axes = getAxes(pitch: 10, yaw: 0)
+        let axes = camera.getAxes()
 
         let transformation = AnyMatrix4<GLMap.Float>([
 
-            axes.x.x, axes.x.y, axes.x.z, camera.position.x,
+            axes.x.x, axes.y.x, axes.z.x, camera.position.x,
 
-            axes.y.x, axes.y.y, axes.y.z, camera.position.y,
+            axes.x.y, axes.y.y, axes.z.y, camera.position.y,
 
-            axes.z.x, axes.z.y, axes.z.z, camera.position.z,
+            axes.x.z, axes.y.z, axes.z.z, camera.position.z,
 
             0, 0, 0, 1
 
@@ -327,7 +316,7 @@ extension GLVoxelRenderer {
 
     void main() {
 
-        FragColor = (Highlighted > 0 ? 10 : 1) * vec4(dot(Normal, vec3(0, 1, 0)) * vec3(1.0, 1.0, 1.0), 1.0);
+        FragColor = vec4((dot(Normal, vec3(0, 1, 0)) + (Highlighted > 0 ? 1 : 0)) * vec3(1.0, 1.0, 1.0), 1.0);
     }
     """
 }

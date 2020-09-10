@@ -5,7 +5,9 @@ public class MetaView: SingleChildWidget {
 
     private let scene: Scene
 
-    @Reference private var cameraPositionWidget: Text
+    @Observable private var cameraPositionText = "None"
+
+    @Observable private var cameraDirectionText = "None"
 
     public init(_ scene: Scene) {
 
@@ -26,7 +28,14 @@ public class MetaView: SingleChildWidget {
 
                             Text("Position:")
                             
-                            Text("None").connect(ref: $cameraPositionWidget)
+                            Text($cameraPositionText)
+                        }
+
+                        Row {
+
+                            Text("Direction:")
+
+                            Text($cameraDirectionText)
                         }
 
                         for (i, voxel) in scene.voxels.enumerated() {
@@ -50,12 +59,12 @@ public class MetaView: SingleChildWidget {
 
     public func update() {
 
-        cameraPositionWidget.text = """
+        cameraPositionText = """
         x: \(scene.camera.position.x, format: "%.2f") y: \(scene.camera.position.y, format: "%.2f") z: \(scene.camera.position.z, format: "%.2f")
         """
 
-        cameraPositionWidget.invalidateLayout()
-    
-        cameraPositionWidget.layout(constraints: cameraPositionWidget.previousConstraints!)
+        cameraDirectionText = """
+        x: \(scene.camera.direction.x, format: "%.2f") y: \(scene.camera.direction.y, format: "%.2f") z: \(scene.camera.direction.z, format: "%.2f")
+        """
     }
 }
