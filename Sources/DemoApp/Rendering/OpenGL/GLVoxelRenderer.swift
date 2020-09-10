@@ -195,7 +195,7 @@ public struct GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let axes = getAxes(pitch: 10, yaw: 10)
+        let axes = getAxes(pitch: 10, yaw: 0)
 
         let transformation = AnyMatrix4<GLMap.Float>([
 
@@ -213,7 +213,7 @@ public struct GLVoxelRenderer {
 
         let far = 100.0
 
-        let fov = 60.0
+        let fov = camera.fov
 
         let scale = 1 / (tan(fov / 2.0 * Double.pi / 180.0))
 
