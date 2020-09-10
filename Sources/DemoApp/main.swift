@@ -5,21 +5,27 @@ import GL
 
 public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVGWindow> {
 
-    private var window: Window?
+    private var window: Window
 
     private let scene = Scene(voxels: [
-        Voxel(position: DVec3(0, 0, 0))
-    ])
+
+        Voxel(position: DVec3(0, 0, 0)),
+        
+        Voxel(position: DVec3(1, 1, 1))
+        
+    ], camera: Camera(position: DVec3(0, 0, 0)))
 
     private let renderer: GLSceneRenderer
 
     public init() {
 
+        let system = try! System()
+
         renderer = GLSceneRenderer(scene: scene)
 
-        super.init(system: try! System())
-
         window = try! Window(background: .Grey, size: DSize2(800, 800))
+
+        super.init(system: system)
 
         renderer.setup()
 
@@ -28,9 +34,24 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func frame(_ deltaTime: Int) {
 
-        guard let window = window else {
+        if system.keyStates[.ArrowUp] {
 
-            fatalError("Don't have a window.")
+            scene.camera.position.z += 1
+        }
+
+        if system.keyStates[.ArrowDown] {
+
+            scene.camera.position.z -= 1
+        }
+        
+        if system.keyStates[.ArrowLeft] {
+
+            scene.camera.position.x += 1
+        }
+
+        if system.keyStates[.ArrowRight] {
+
+            scene.camera.position.x -= 1
         }
 
         window.makeCurrent()

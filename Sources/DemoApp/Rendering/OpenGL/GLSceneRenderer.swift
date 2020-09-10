@@ -16,13 +16,6 @@ public class GLSceneRenderer {
 
     public func render() {
 
-        GLVoxelRenderer.render(voxels: [
-
-            Voxel(position: DVec3(0, 0, 0)),
-
-            Voxel(position: DVec3(1, 1, 1)),
-
-           // Voxel(position: DVec3(-1, 0, 0))
-        ])
+        GLVoxelRenderer.render(voxels: scene.voxels, camera: scene.camera)
     }
 }
