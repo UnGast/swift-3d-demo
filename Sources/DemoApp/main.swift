@@ -56,6 +56,8 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
         _ = system.onFrame(frame)
 
         _ = window.onResize { [unowned self] _ in updateGUIBounds() }
+
+        _ = window.onMouse { [unowned self] in guiRoot.consume($0) }
     }
 
     private func buildGUI() -> Root {

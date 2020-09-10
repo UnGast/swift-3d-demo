@@ -26,17 +26,26 @@ public class MetaView: SingleChildWidget {
 
                             Text("Position:")
                             
-                            Text("Non asdasdasd asd se").connect(ref: $cameraPositionWidget)
+                            Text("None").connect(ref: $cameraPositionWidget)
                         }
 
-                        for voxel in scene.voxels {
+                        for (i, voxel) in scene.voxels.enumerated() {
 
-                            Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
+                            MouseArea {
+                                
+                                Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
+
+                            } onClick: { _ in handleVoxelClick(i) }
                         }
                     }
                 }
             }
         }
+    }
+
+    private func handleVoxelClick(_ i: Int) {
+
+        scene.voxels[i].highlighted = true
     }
 
     public func update() {

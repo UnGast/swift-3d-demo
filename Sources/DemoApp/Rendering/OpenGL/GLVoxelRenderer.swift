@@ -160,11 +160,16 @@ public struct GLVoxelRenderer {
             glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, ebo)
             glBufferData(GLMap.ELEMENT_ARRAY_BUFFER, MemoryLayout<GLMap.UInt>.size * indices.count, indices, GLMap.STATIC_DRAW)
 
-            glVertexAttribPointer(0, 3, GLMap.FLOAT, false, GLMap.Size(MemoryLayout<GLMap.Float>.size * 6), UnsafeRawPointer(bitPattern: 0))
+            let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 7)
+
+            glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: 0))
             glEnableVertexAttribArray(0)
 
-            glVertexAttribPointer(1, 3, GLMap.FLOAT, false, GLMap.Size(MemoryLayout<GLMap.Float>.size * 6), UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 3))
+            glVertexAttribPointer(1, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 3))
             glEnableVertexAttribArray(1)
+
+            glVertexAttribPointer(2, 1, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 6))
+            glEnableVertexAttribArray(2)
 
             glBindVertexArray(0)
             glBindBuffer(GLMap.ARRAY_BUFFER, 0)
@@ -247,6 +252,8 @@ public struct GLVoxelRenderer {
                 bufferData.append(contentsOf: position.elements[..<3])
 
                 bufferData.append(contentsOf: normal.elements[..<3])
+
+                bufferData.append(voxel.highlighted ? 1 : 0)
             }
         }
 
@@ -293,13 +300,19 @@ extension GLVoxelRenderer {
 
     layout (location = 1) in vec3 inNormal;
 
+    layout (location = 2) in float inHighlighted;
+
     out vec3 Normal;
+
+    out float Highlighted;
 
     void main() {
         
         gl_Position = vec4(inPos, 1);
 
         Normal = inNormal;
+
+        Highlighted = inHighlighted;
     }
     """
 
@@ -308,11 +321,13 @@ extension GLVoxelRenderer {
 
     in vec3 Normal;
 
+    in float Highlighted;
+
     out vec4 FragColor;
 
     void main() {
 
-        FragColor = vec4(dot(Normal, vec3(0, 1, 0)) * vec3(1.0, 1.0, 1.0), 1.0);
+        FragColor = (Highlighted > 0 ? 10 : 1) * vec4(dot(Normal, vec3(0, 1, 0)) * vec3(1.0, 1.0, 1.0), 1.0);
     }
     """
 }
