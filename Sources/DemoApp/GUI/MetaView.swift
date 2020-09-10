@@ -64,7 +64,7 @@ public class MetaView: SingleChildWidget {
         """
 
         cameraDirectionText = """
-        x: \(scene.camera.direction.x, format: "%.2f") y: \(scene.camera.direction.y, format: "%.2f") z: \(scene.camera.direction.z, format: "%.2f")
+        x: \(scene.camera.forward.x, format: "%.2f") y: \(scene.camera.forward.y, format: "%.2f") z: \(scene.camera.forward.z, format: "%.2f")
         """
     }
 }

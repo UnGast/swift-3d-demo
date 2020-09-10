@@ -105,22 +105,22 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         if system.keyStates[.ArrowUp] {
 
-            scene.camera.position.z += 1 * timeStep
+            scene.camera.position += scene.camera.forward * timeStep
         }
 
         if system.keyStates[.ArrowDown] {
 
-            scene.camera.position.z -= 1 * timeStep
+            scene.camera.position -= scene.camera.forward * timeStep
         }
         
         if system.keyStates[.ArrowLeft] {
 
-            scene.camera.position.x += 1 * timeStep
+            scene.camera.position += scene.camera.right * timeStep
         }
 
         if system.keyStates[.ArrowRight] {
 
-            scene.camera.position.x -= 1 * timeStep
+            scene.camera.position -= scene.camera.right * timeStep
         }
 
         updateGUIContent()

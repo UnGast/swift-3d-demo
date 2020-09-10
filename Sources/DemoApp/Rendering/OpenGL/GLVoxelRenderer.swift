@@ -189,15 +189,13 @@ public struct GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let axes = camera.getAxes()
-
         let transformation = AnyMatrix4<GLMap.Float>([
 
-            axes.x.x, axes.y.x, axes.z.x, camera.position.x,
+            camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
 
-            axes.x.y, axes.y.y, axes.z.y, camera.position.y,
+            camera.right.y, camera.up.y, camera.forward.y, camera.position.y,
 
-            axes.x.z, axes.y.z, axes.z.z, camera.position.z,
+            camera.right.z, camera.up.z, camera.forward.z, camera.position.z,
 
             0, 0, 0, 1
 
