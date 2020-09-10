@@ -209,6 +209,25 @@ public struct GLVoxelRenderer {
 
         ].map(Float.init))
 
+        let near = 0.1
+
+        let far = 100.0
+
+        let fov = 60.0
+
+        let scale = 1 / (tan(fov / 2.0 * Double.pi / 180.0))
+
+        let projection = AnyMatrix4<GLMap.Float>([
+
+            Float(scale), 0, 0, 0,
+
+            0, Float(scale), 0, 0,
+
+            0, 0, Float(-far/(far - near)), Float(-(far * near)/(far - near)),
+
+            0, 0, -1, 0
+        ])
+
         // let compundTransformation = cameraToWorldTransformation.matmul(worldTransformation)
 
         var bufferData = [GLMap.Float]()
@@ -219,7 +238,9 @@ public struct GLVoxelRenderer {
 
                 var position = AnyVector4<Float>((vertex.position + voxel.position).elements.map(Float.init) + [1])
 
-                position = AnyVector4(transformation.matmul(position).elements)
+                position = AnyVector4(projection.matmul(transformation.matmul(position)).elements)
+
+                position /= position.w
 
                 let normal = transformation.matmul(AnyVector4<Float>(vertex.normal.elements.map(Float.init) + [1]))
 

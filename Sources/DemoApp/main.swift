@@ -11,7 +11,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         Voxel(position: DVec3(0, 0, 0)),
         
-        Voxel(position: DVec3(1, 1, 1))
+        //Voxel(position: DVec3(1, 1, 1))
         
     ], camera: Camera(position: DVec3(0, 0, 0)))
 
@@ -34,24 +34,26 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func frame(_ deltaTime: Int) {
 
+        let timeStep = Double(deltaTime) / 1000
+
         if system.keyStates[.ArrowUp] {
 
-            scene.camera.position.z += 1
+            scene.camera.position.z += 1 * timeStep
         }
 
         if system.keyStates[.ArrowDown] {
 
-            scene.camera.position.z -= 1
+            scene.camera.position.z -= 1 * timeStep
         }
         
         if system.keyStates[.ArrowLeft] {
 
-            scene.camera.position.x += 1
+            scene.camera.position.x += 1 * timeStep
         }
 
         if system.keyStates[.ArrowRight] {
 
-            scene.camera.position.x -= 1
+            scene.camera.position.x -= 1 * timeStep
         }
 
         window.makeCurrent()
@@ -61,6 +63,8 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
         glClear(GLMap.COLOR_BUFFER_BIT | GLMap.DEPTH_BUFFER_BIT)
 
         glEnable(GLMap.BLEND)
+
+        glEnable(GLMap.DEPTH_TEST)
 
         glViewport(0, 0, GLMap.Size(window.drawableSize.width), GLMap.Size(window.drawableSize.height))
 
