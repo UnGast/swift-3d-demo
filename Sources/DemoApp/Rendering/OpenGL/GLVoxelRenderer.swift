@@ -2,34 +2,22 @@ import Foundation
 import GL
 import CustomGraphicsMath
 
-public struct Vertex {
+public class GLVoxelRenderer {
 
-    public var position: DVec3
+    private let shaderProgram = ShaderProgram(
 
-    public var normal: DVec3
-
-    public init(_ position: DVec3, _ normal: DVec3) {
-
-        self.position = position
-
-        self.normal = normal
-    }
-}
-
-public struct GLVoxelRenderer {
-
-    private static let shaderProgram = ShaderProgram(
-
-        vertex: vertexSource,
+        vertex: GLVoxelRenderer.vertexSource,
         
-        fragment: fragmentSource
+        fragment: GLVoxelRenderer.fragmentSource
     )
 
-    private static var vbo: GLMap.UInt = 0
+    private var vao: GLMap.UInt = 0
 
-    private static var vao: GLMap.UInt = 0
+    private var vbo: GLMap.UInt = 0
 
-    private static var ebo: GLMap.UInt = 0
+    private var ebo: GLMap.UInt = 0
+
+   // private 
 
     private static var baseVertices: [Vertex] = [
 
@@ -122,7 +110,7 @@ public struct GLVoxelRenderer {
     ]
 
     /*
-    private static let worldTransformation = AnyMatrix4<GLMap.Float>([
+    private let worldTransformation = Matrix4<GLMap.Float>([
         
         0.4, 0, 0.9, 0,
 
@@ -133,7 +121,7 @@ public struct GLVoxelRenderer {
         0, 0, 0, 1
     ])
 
-    private static let cameraToWorldTransformation = AnyMatrix4<GLMap.Float>([
+    private let cameraToWorldTransformation = Matrix4<GLMap.Float>([
 
         1, 0, 0, 0,
 
@@ -144,7 +132,7 @@ public struct GLVoxelRenderer {
         0, 0, 0, 1
     ])*/
 
-    public static func setup() {
+    public func setup() {
 
         do {
             
@@ -158,7 +146,7 @@ public struct GLVoxelRenderer {
 
             glGenBuffers(1, &ebo)
             glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, ebo)
-            glBufferData(GLMap.ELEMENT_ARRAY_BUFFER, MemoryLayout<GLMap.UInt>.size * indices.count, indices, GLMap.STATIC_DRAW)
+            glBufferData(GLMap.ELEMENT_ARRAY_BUFFER, MemoryLayout<GLMap.UInt>.size * GLVoxelRenderer.indices.count, GLVoxelRenderer.indices, GLMap.STATIC_DRAW)
 
             let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 7)
 
@@ -171,6 +159,10 @@ public struct GLVoxelRenderer {
             glVertexAttribPointer(2, 1, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 6))
             glEnableVertexAttribArray(2)
 
+
+
+            //glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern))
+
             glBindVertexArray(0)
             glBindBuffer(GLMap.ARRAY_BUFFER, 0)
             glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, 0)
@@ -181,7 +173,7 @@ public struct GLVoxelRenderer {
         }
     }
 
-    public static func render(voxels: [Voxel], camera: Camera) {
+    public func render(voxels: [Voxel], camera: Camera) {
 
         shaderProgram.use()
 
@@ -189,7 +181,7 @@ public struct GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let transformation = AnyMatrix4<GLMap.Float>([
+        let transformation = Matrix4<GLMap.Float>([
 
             camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
 
@@ -209,7 +201,7 @@ public struct GLVoxelRenderer {
 
         let scale = 1 / (tan(fov / 2.0 * Double.pi / 180.0))
 
-        let projection = AnyMatrix4<GLMap.Float>([
+        let projection = Matrix4<GLMap.Float>([
 
             Float(scale), 0, 0, 0,
 
@@ -226,15 +218,15 @@ public struct GLVoxelRenderer {
 
         for voxel in voxels {
 
-            for vertex in baseVertices {
+            for vertex in GLVoxelRenderer.baseVertices {
 
-                var position = AnyVector4<Float>((vertex.position + voxel.position).elements.map(Float.init) + [1])
+                var position = Vector4<Float>((vertex.position + voxel.position).elements.map(Float.init) + [1])
 
-                position = AnyVector4(projection.matmul(transformation.matmul(position)).elements)
+                position = Vector4(projection.matmul(transformation.matmul(position)).elements)
 
                 position /= position.w
 
-                let normal = transformation.matmul(AnyVector4<Float>(vertex.normal.elements.map(Float.init) + [1]))
+                let normal = transformation.matmul(Vector4<Float>(vertex.normal.elements.map(Float.init) + [1]))
 
                 bufferData.append(contentsOf: position.elements[..<3])
 
@@ -250,7 +242,7 @@ public struct GLVoxelRenderer {
 
             baseVertices.flatMap { vertex -> [Float] in
 
-                let vertex4 = AnyVector4<Float>((vertex + voxel.position).elements.map(Float.init) + [1])
+                let vertex4 = Vector4<Float>((vertex + voxel.position).elements.map(Float.init) + [1])
 
                 return (worldTransformation * vertex4).elements[..<3].map { Float($0) } }
         }*/
@@ -270,9 +262,9 @@ public struct GLVoxelRenderer {
 
         // CONTINUE READING: https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point/mathematics-computing-2d-coordinates-of-3d-points
 
-        glDrawElements(GLMap.TRIANGLES, GLMap.Size(indices.count * voxels.count), GLMap.UNSIGNED_INT, nil)
+        // glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(indices.count), GLMap.UNSIGNED_INT, indices, GLMap.Size(1))
 
-        //glDrawArrays(GLMap.TRIANGLES, 0, 9)
+        //glDrawArrays(GLMap.TRIANGLES, 0, GLMap.Size(voxels.count * baseVertices.count))
 
         glBindVertexArray(0)
     }

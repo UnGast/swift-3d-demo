@@ -1,12 +1,12 @@
 public class Scene {
 
-    public var voxels: [Voxel]
+    public var world: World
 
     public var camera: Camera
 
-    public init(voxels: [Voxel], camera: Camera) {
+    public init(world: World, camera: Camera) {
 
-        self.voxels = voxels
+        self.world = world
 
         self.camera = camera
     }

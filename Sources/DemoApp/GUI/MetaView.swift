@@ -38,7 +38,7 @@ public class MetaView: SingleChildWidget {
                             Text($cameraDirectionText)
                         }
 
-                        for (i, voxel) in scene.voxels.enumerated() {
+                        for (i, voxel) in scene.world.voxels.enumerated() {
 
                             MouseArea {
                                 
@@ -54,7 +54,7 @@ public class MetaView: SingleChildWidget {
 
     private func handleVoxelClick(_ i: Int) {
 
-        scene.voxels[i].highlighted = true
+        scene.world.voxels[i].highlighted = true
     }
 
     public func update() {

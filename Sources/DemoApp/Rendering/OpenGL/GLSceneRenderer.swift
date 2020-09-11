@@ -4,18 +4,22 @@ public class GLSceneRenderer {
 
     private let scene: Scene
 
+    private var voxelRenderer: GLVoxelRenderer
+
     public init(scene: Scene) {
 
         self.scene = scene
+
+        self.voxelRenderer = GLVoxelRenderer()
     }
 
     public func setup() {
 
-        GLVoxelRenderer.setup()
+        voxelRenderer.setup()
     }
 
     public func render() {
 
-        GLVoxelRenderer.render(voxels: scene.voxels, camera: scene.camera)
+        voxelRenderer.render(voxels: scene.world.voxels, camera: scene.camera)
     }
 }

@@ -8,13 +8,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private var window: Window
 
-    private let scene = Scene(voxels: [
-
-        Voxel(position: DVec3(0, 0, 5)),
-        
-        //Voxel(position: DVec3(1, 1, 1))
-        
-    ], camera: Camera(position: DVec3(0, 0, -10), fov: 90))
+    private let scene: Scene
 
     private let sceneRenderer: GLSceneRenderer
 
@@ -26,7 +20,19 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     @Observable private var cameraPositionText = ""
 
+
+
     public init() {
+
+        let worldGenerator = WorldGenerator()
+
+        worldGenerator.size = DSize3(5, 10, 2)
+
+        let world = worldGenerator.generate()
+
+        scene = Scene(world: world, camera: Camera(position: DVec3(0, 0, -10), fov: 90))
+
+
 
         let system = try! System()
 
@@ -37,6 +43,8 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
         canvasRenderer = SDL2OpenGL3NanoVGRenderer(for: window)
 
         super.init(system: system)
+
+
 
         sceneRenderer.setup()
 
