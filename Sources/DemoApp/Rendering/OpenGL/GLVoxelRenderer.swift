@@ -17,9 +17,9 @@ public class GLVoxelRenderer {
 
     private var ebo: GLMap.UInt = 0
 
-   // private 
+    private var instanceDataBuffer: GLMap.UInt = 0
 
-    private static var baseVertices: [Vertex] = [
+    private static var vertices: [Vertex] = [
 
         // top
         Vertex(DVec3(-0.5, 0.5, 0.5), DVec3(0, 1, 0)),
@@ -109,46 +109,27 @@ public class GLVoxelRenderer {
         20, 22, 23
     ]
 
-    /*
-    private let worldTransformation = Matrix4<GLMap.Float>([
-        
-        0.4, 0, 0.9, 0,
-
-        0, 1, 0, 0,
-
-        0, 0, 1, 0,
-
-        0, 0, 0, 1
-    ])
-
-    private let cameraToWorldTransformation = Matrix4<GLMap.Float>([
-
-        1, 0, 0, 0,
-
-        0, 1, 0, 0,
-
-        0, 0, 1, 0,
-
-        0, 0, 0, 1
-    ])*/
-
     public func setup() {
 
         do {
             
             try shaderProgram.compile()
 
+
             glGenVertexArrays(1, &vao)
             glBindVertexArray(vao)
 
+
             glGenBuffers(1, &vbo)
             glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
+            let vertexBufferData = GLVoxelRenderer.vertices.flatMap { $0.position.elements.map(Float.init) + $0.normal.elements.map(Float.init) }
+            glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * vertexBufferData.count, vertexBufferData, GLMap.STATIC_DRAW)
 
             glGenBuffers(1, &ebo)
             glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, ebo)
             glBufferData(GLMap.ELEMENT_ARRAY_BUFFER, MemoryLayout<GLMap.UInt>.size * GLVoxelRenderer.indices.count, GLVoxelRenderer.indices, GLMap.STATIC_DRAW)
 
-            let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 7)
+            let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 6)
 
             glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: 0))
             glEnableVertexAttribArray(0)
@@ -156,16 +137,23 @@ public class GLVoxelRenderer {
             glVertexAttribPointer(1, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 3))
             glEnableVertexAttribArray(1)
 
-            glVertexAttribPointer(2, 1, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 6))
+
+            glGenBuffers(1, &instanceDataBuffer)
+            glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
+
+            let instanceDataStride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 3)
+
+            glVertexAttribPointer(2, 3, GLMap.FLOAT, false, instanceDataStride, UnsafeRawPointer(bitPattern: 0))
             glEnableVertexAttribArray(2)
+            glVertexAttribDivisor(2, 1)
 
-
-
-            //glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern))
 
             glBindVertexArray(0)
-            glBindBuffer(GLMap.ARRAY_BUFFER, 0)
+
             glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, 0)
+
+            glBindBuffer(GLMap.ARRAY_BUFFER, 0)
+
 
         } catch {
 
@@ -179,9 +167,8 @@ public class GLVoxelRenderer {
 
         glBindVertexArray(vao)
 
-        glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
-        let transformation = Matrix4<GLMap.Float>([
+        let toCameraTransformation = Matrix4<GLMap.Float>([
 
             camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
 
@@ -212,42 +199,16 @@ public class GLVoxelRenderer {
             0, 0, -1, 0
         ])
 
-        // let compundTransformation = cameraToWorldTransformation.matmul(worldTransformation)
+        let viewTransformation = projection.matmul(toCameraTransformation)
 
-        var bufferData = [GLMap.Float]()
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
 
-        for voxel in voxels {
 
-            for vertex in GLVoxelRenderer.baseVertices {
+        glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
 
-                var position = Vector4<Float>((vertex.position + voxel.position).elements.map(Float.init) + [1])
+        let instanceData = voxels.flatMap { $0.position.elements.map(Float.init) }
 
-                position = Vector4(projection.matmul(transformation.matmul(position)).elements)
-
-                position /= position.w
-
-                let normal = transformation.matmul(Vector4<Float>(vertex.normal.elements.map(Float.init) + [1]))
-
-                bufferData.append(contentsOf: position.elements[..<3])
-
-                bufferData.append(contentsOf: normal.elements[..<3])
-
-                bufferData.append(voxel.highlighted ? 1 : 0)
-            }
-        }
-
-        //print("BUFFER DATA", bufferData.count, indices.count * voxels.count)
-
-        /*let vertices = voxels.flatMap { voxel in
-
-            baseVertices.flatMap { vertex -> [Float] in
-
-                let vertex4 = Vector4<Float>((vertex + voxel.position).elements.map(Float.init) + [1])
-
-                return (worldTransformation * vertex4).elements[..<3].map { Float($0) } }
-        }*/
-
-        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * bufferData.count, bufferData, GLMap.STATIC_DRAW)
+        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * instanceData.count, instanceData, GLMap.DYNAMIC_DRAW)
 
         /*let testData: [GLMap.Float] = [
 
@@ -256,15 +217,14 @@ public class GLVoxelRenderer {
             1, 0, 0, 0, 0, 0,
 
             0, 1, 0, 0, 0, 0
-        ]*/
+        ]
 
-        //glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * testData.count, testData, GLMap.STATIC_DRAW)
+        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * testData.count, testData, GLMap.STATIC_DRAW)
 
-        // CONTINUE READING: https://www.scratchapixel.com/lessons/3d-basic-rendering/computing-pixel-coordinates-of-3d-point/mathematics-computing-2d-coordinates-of-3d-points
+        glDrawArrays(GLMap.TRIANGLES, 0, GLMap.Size(3))*/
 
-        // glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(indices.count), GLMap.UNSIGNED_INT, indices, GLMap.Size(1))
 
-        //glDrawArrays(GLMap.TRIANGLES, 0, GLMap.Size(voxels.count * baseVertices.count))
+        glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(voxels.count))
 
         glBindVertexArray(0)
     }
@@ -275,23 +235,21 @@ extension GLVoxelRenderer {
     private static let vertexSource = """
     #version 330 core
 
-    layout (location = 0) in vec3 inPos;
+    layout (location = 0) in vec3 vertexPosition;
 
-    layout (location = 1) in vec3 inNormal;
+    layout (location = 1) in vec3 vertexNormal;
 
-    layout (location = 2) in float inHighlighted;
+    layout (location = 2) in vec3 translation;
+
+    uniform mat4 viewTransformation;
 
     out vec3 Normal;
 
-    out float Highlighted;
-
     void main() {
         
-        gl_Position = vec4(inPos, 1);
+        gl_Position = viewTransformation * vec4(vertexPosition + translation, 1);
 
-        Normal = inNormal;
-
-        Highlighted = inHighlighted;
+        Normal = vertexNormal;
     }
     """
 
@@ -300,13 +258,13 @@ extension GLVoxelRenderer {
 
     in vec3 Normal;
 
-    in float Highlighted;
+    //in float Highlighted;
 
     out vec4 FragColor;
 
     void main() {
 
-        FragColor = vec4((dot(Normal, vec3(0, 1, 0)) + (Highlighted > 0 ? 1 : 0)) * vec3(1.0, 1.0, 1.0), 1.0);
+        FragColor = vec4((dot(Normal, vec3(0, 1, 0)) /*+ (Highlighted > 0 ? 1 : 0)*/) * vec3(1.0, 1.0, 1.0), 1.0);
     }
     """
 }

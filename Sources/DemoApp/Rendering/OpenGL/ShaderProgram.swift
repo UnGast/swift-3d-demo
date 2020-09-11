@@ -11,7 +11,7 @@ public struct ShaderError: Error {
 open class ShaderProgram {
     public let vertexSource: String
     public let fragmentSource: String
-    public var id: GLMap.UInt?
+    public var id: GLMap.UInt = 0
 
     public init(vertex vertexSource: String, fragment fragmentSource: String) {
         self.vertexSource = vertexSource
@@ -19,9 +19,7 @@ open class ShaderProgram {
     }
 
     deinit {
-        if let id = id {
-            glDeleteProgram(id)
-        }
+        glDeleteProgram(id)
     }
 
     /// compiles and links the shaders
@@ -52,13 +50,13 @@ open class ShaderProgram {
         }
 
         self.id = glCreateProgram()
-        glAttachShader(self.id!, vertexShader)
-        glAttachShader(self.id!, fragmentShader)
-        glLinkProgram(self.id!)
+        glAttachShader(self.id, vertexShader)
+        glAttachShader(self.id, fragmentShader)
+        glLinkProgram(self.id)
 
-        glGetProgramiv(self.id!, GLMap.LINK_STATUS, success)
+        glGetProgramiv(self.id, GLMap.LINK_STATUS, success)
         if (success.pointee == 0) {
-            glGetProgramInfoLog(self.id!, 512, nil, info)
+            glGetProgramInfoLog(self.id, 512, nil, info)
             throw ShaderError(String(cString: info))
         } else {
             print("Shader program linked successfully.")
@@ -70,7 +68,7 @@ open class ShaderProgram {
 
     open func use() {
         
-        guard let id = self.id else {
+        if id == 0 {
             fatalError("Called use on shader before it was compiled.")
         }
 

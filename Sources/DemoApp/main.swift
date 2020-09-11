@@ -30,7 +30,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         let world = worldGenerator.generate()
 
-        scene = Scene(world: world, camera: Camera(position: DVec3(0, 0, -10), fov: 90))
+        scene = Scene(world: world, camera: Camera(position: DVec3(0, 0, -2), fov: 90))
 
 
 
