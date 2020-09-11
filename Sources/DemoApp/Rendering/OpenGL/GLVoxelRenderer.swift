@@ -109,6 +109,9 @@ public class GLVoxelRenderer {
         20, 22, 23
     ]
 
+    public var viewTransformation: Matrix4<Float> = .zero
+
+
     public func setup() {
 
         do {
@@ -167,39 +170,6 @@ public class GLVoxelRenderer {
 
         glBindVertexArray(vao)
 
-
-        let toCameraTransformation = Matrix4<GLMap.Float>([
-
-            camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
-
-            camera.right.y, camera.up.y, camera.forward.y, camera.position.y,
-
-            camera.right.z, camera.up.z, camera.forward.z, camera.position.z,
-
-            0, 0, 0, 1
-
-        ].map(Float.init))
-
-        let near = 0.1
-
-        let far = 100.0
-
-        let fov = camera.fov
-
-        let scale = 1 / (tan(fov / 2.0 * Double.pi / 180.0))
-
-        let projection = Matrix4<GLMap.Float>([
-
-            Float(scale), 0, 0, 0,
-
-            0, Float(scale), 0, 0,
-
-            0, 0, Float(-far/(far - near)), Float(-(far * near)/(far - near)),
-
-            0, 0, -1, 0
-        ])
-
-        let viewTransformation = projection.matmul(toCameraTransformation)
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
 
@@ -264,7 +234,7 @@ extension GLVoxelRenderer {
 
     void main() {
 
-        FragColor = vec4((dot(Normal, vec3(0, 1, 0)) /*+ (Highlighted > 0 ? 1 : 0)*/) * vec3(1.0, 1.0, 1.0), 1.0);
+        FragColor = vec4((dot(Normal, vec3(1, 1, 0)) + 0.2) * vec3(1.0, 1.0, 1.0), 1.0);
     }
     """
 }
