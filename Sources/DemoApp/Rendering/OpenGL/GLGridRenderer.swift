@@ -76,6 +76,20 @@ public class GLGridRenderer {
         shaderProgram.use()
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
+        
+        let orientationTransformation = Matrix4<Float>([
+
+            scene.camera.forward.x, 0, 0, 0,
+
+            scene.camera.forward.y, 1, 0, 0,
+
+            scene.camera.forward.z, 0, 1, 0,
+
+            0, 0, 0, 1
+
+        ].map(Float.init))
+
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "orientationTransformation"), 1, true, orientationTransformation.elements)
 
 
         glBindVertexArray(vao)
@@ -84,33 +98,78 @@ public class GLGridRenderer {
 
         var vertices = [DVec3]()
 
-        let axes = [
+        let gridSize = 0.5
 
-            DVec3(1, 0, 0),
+        let axisWidth = 0.01
 
-            DVec3(0, 1, 0),
+        let gridWidth = 0.001
 
-            DVec3(0, 0, 1)
+        let axisConfigs = [
+
+            (direction: DVec3(1, 0, 0), positiveLength: 20.0, negativeLength: 20.0),
+
+            (direction: DVec3(0, 1, 0), positiveLength: 20.0, negativeLength: 20.0),
+
+            (direction: DVec3(0, 0, 1), positiveLength: 20.0, negativeLength: 20.0)
         ]
 
-        let lineLength = 20.0
-
-        for axis in axes {
+        for (i, axisConfig) in axisConfigs.enumerated() {
 
             vertices.append(
 
                 contentsOf: getLineVertices(
 
-                    from: axis * lineLength / 2,
+                    from: axisConfig.direction * axisConfig.positiveLength,
                     
-                    to: -axis * lineLength / 2,
+                    to: axisConfig.direction * axisConfig.negativeLength * -1,
                     
-                    orthogonalTo: scene.camera.forward,
+                    orthogonalTo: DVec3(1, 0, 0),
                     
-                    width: 0.01)
+                    width: axisWidth)
             )
+
+            for (j, otherAxisConfig) in axisConfigs.enumerated() {
+
+                if j == i {
+
+                    continue
+                }
+
+                let positiveCount = Int(axisConfig.positiveLength / gridSize)
+
+                let negativeCount = Int(axisConfig.negativeLength / gridSize)
+
+                for i in 0..<(negativeCount + positiveCount) {
+
+                    let mainAxisPosition: DVec3
+
+                    if i >= positiveCount {
+
+                        mainAxisPosition = axisConfig.direction * gridSize * Double(i - positiveCount) * -1                 
+
+                    } else {
+
+                        mainAxisPosition = axisConfig.direction * gridSize * Double(i)
+
+                    }
+
+
+                    vertices.append(
+
+                        contentsOf: getLineVertices(
+                            
+                            from: mainAxisPosition + otherAxisConfig.direction * otherAxisConfig.positiveLength,
+                            
+                            to: mainAxisPosition + otherAxisConfig.direction * otherAxisConfig.negativeLength * -1,
+                            
+                            orthogonalTo: DVec3(1, 0, 0),
+                            
+                            width: gridWidth)
+                    )
+                }
+            }
         }
-        
+
         let bufferData = vertices.flatMap { $0.elements.map(Float.init) }
 
         glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * bufferData.count, bufferData, GLMap.DYNAMIC_DRAW)
@@ -133,9 +192,11 @@ extension GLGridRenderer {
 
     uniform mat4 viewTransformation;
 
+    uniform mat4 orientationTransformation;
+
     void main() {
 
-        gl_Position = viewTransformation * vec4(vertexPosition, 1);
+        gl_Position = viewTransformation * orientationTransformation * vec4(vertexPosition, 1);
     }
     """
 
