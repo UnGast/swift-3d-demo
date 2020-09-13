@@ -14,8 +14,6 @@ public class GLGridRenderer {
 
     private var vbo = GLMap.UInt()
 
-    public var viewTransformation: Matrix4<Float> = .zero
-
 
     public init() {}
 
@@ -71,13 +69,31 @@ public class GLGridRenderer {
         return vertices
     }
 
-    public func render(scene: Scene) {
+    public func render(scene: Scene, context: GLRenderContext) {
 
         shaderProgram.use()
 
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
+        glUniformMatrix4fv(
+
+            glGetUniformLocation(shaderProgram.id, "viewTransformation"),
+
+            1,
+
+            true,
+
+            context.projectionTransformation.matmul(context.cameraTransformation/*Matrix4([
+
+                1, 0, 0, scene.camera.position.x,
+
+                0, 1, 0, scene.camera.position.y,
+
+                0, 0, 1, scene.camera.position.z,
+
+                0, 0, 0, 1
+
+            ].map(Float.init))*/).elements)
         
-        let orientationTransformation = Matrix4<Float>([
+        /*let orientationTransformation = Matrix4<Float>([
 
             scene.camera.forward.x, 0, 0, 0,
 
@@ -89,7 +105,7 @@ public class GLGridRenderer {
 
         ].map(Float.init))
 
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "orientationTransformation"), 1, true, orientationTransformation.elements)
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "orientationTransformation"), 1, true, orientationTransformation.elements)*/
 
 
         glBindVertexArray(vao)
@@ -106,11 +122,11 @@ public class GLGridRenderer {
 
         let axisConfigs = [
 
-            (direction: DVec3(1, 0, 0), positiveLength: 20.0, negativeLength: 20.0),
+            (direction: DVec3(1, 0, 0), positiveLength: 20.0, negativeLength: 20.0, color: Color.Red),
 
-            (direction: DVec3(0, 1, 0), positiveLength: 20.0, negativeLength: 20.0),
+            (direction: DVec3(0, 1, 0), positiveLength: 20.0, negativeLength: 20.0, color: .Green),
 
-            (direction: DVec3(0, 0, 1), positiveLength: 20.0, negativeLength: 20.0)
+            (direction: DVec3(0, 0, 1), positiveLength: 20.0, negativeLength: 20.0, color: .Blue)
         ]
 
         for (i, axisConfig) in axisConfigs.enumerated() {
@@ -123,7 +139,7 @@ public class GLGridRenderer {
                     
                     to: axisConfig.direction * axisConfig.negativeLength * -1,
                     
-                    orthogonalTo: DVec3(1, 0, 0),
+                    orthogonalTo: DVec3(0, 0, 1),
                     
                     width: axisWidth)
             )
@@ -162,7 +178,7 @@ public class GLGridRenderer {
                             
                             to: mainAxisPosition + otherAxisConfig.direction * otherAxisConfig.negativeLength * -1,
                             
-                            orthogonalTo: DVec3(1, 0, 0),
+                            orthogonalTo: DVec3(0, 0, 1),
                             
                             width: gridWidth)
                     )
@@ -192,11 +208,11 @@ extension GLGridRenderer {
 
     uniform mat4 viewTransformation;
 
-    uniform mat4 orientationTransformation;
+    //uniform mat4 orientationTransformation;
 
     void main() {
 
-        gl_Position = viewTransformation * orientationTransformation * vec4(vertexPosition, 1);
+        gl_Position = viewTransformation * vec4(vertexPosition, 1);
     }
     """
 

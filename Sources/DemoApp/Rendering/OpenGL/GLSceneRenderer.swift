@@ -29,7 +29,7 @@ public class GLSceneRenderer {
 
         let camera = scene.camera
 
-        let toCameraTransformation = Matrix4<GLMap.Float>([
+        let cameraTransformation = Matrix4<GLMap.Float>([
 
             camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
 
@@ -49,7 +49,7 @@ public class GLSceneRenderer {
 
         let scale = 1 / (tan(fov / 2.0 * Double.pi / 180.0))
 
-        let projection = Matrix4<GLMap.Float>([
+        let projectionTransformation = Matrix4<GLMap.Float>([
 
             Float(scale), 0, 0, 0,
 
@@ -60,14 +60,20 @@ public class GLSceneRenderer {
             0, 0, -1, 0
         ])
 
-        let viewTransformation = projection.matmul(toCameraTransformation)
+        let viewTransformation = projectionTransformation.matmul(cameraTransformation)
+
+        var context = GLRenderContext()
+
+        context.cameraTransformation = cameraTransformation
+
+        context.projectionTransformation = projectionTransformation
+
+        context.viewTransformation = viewTransformation
 
         voxelRenderer.viewTransformation = viewTransformation
 
         voxelRenderer.render(voxels: scene.world.voxels, camera: scene.camera)
 
-        gridRenderer.viewTransformation = viewTransformation
-
-        gridRenderer.render(scene: scene)
+        gridRenderer.render(scene: scene, context: context)
     }
 }
