@@ -30,11 +30,13 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         let world = worldGenerator.generate()
 
-        scene = Scene(world: world, camera: Camera(position: DVec3(0, 0, -2), fov: 90))
+        scene = Scene(world: world, camera: Camera(position: DVec3(0, 10, 20), fov: 90))
 
 
 
         let system = try! System()
+
+        system.relativeMouseMode = true
 
         sceneRenderer = GLSceneRenderer(scene: scene)
 
@@ -91,18 +93,20 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         if let event = event as? RawMouseMoveEvent {
             
-            scene.camera.yaw += event.move.x * 0.01
+            scene.camera.yaw -= event.move.x * 0.001
 
-            scene.camera.pitch += event.move.y * 0.01
+            //scene.camera.yaw = scene.camera.yaw.truncatingRemainder(dividingBy: 2 * Double.pi)
 
-            if scene.camera.pitch > 90 {
+            scene.camera.pitch += event.move.y * 0.001
 
-                scene.camera.pitch = 90
+            if scene.camera.pitch > Double.pi / 2 * 0.9 {
+
+                scene.camera.pitch = Double.pi / 2 * 0.9
             }
 
-            if scene.camera.pitch < -90 {
+            if scene.camera.pitch < -Double.pi / 2 * 0.9 {
 
-                scene.camera.pitch = -90
+                scene.camera.pitch = -Double.pi / 2 * 0.9
             }
         }
     }
@@ -113,22 +117,22 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         if system.keyStates[.ArrowUp] {
 
-            scene.camera.position += scene.camera.forward * timeStep
+            scene.camera.position -= scene.camera.forward * timeStep
         }
 
         if system.keyStates[.ArrowDown] {
 
-            scene.camera.position -= scene.camera.forward * timeStep
+            scene.camera.position += scene.camera.forward * timeStep
         }
         
         if system.keyStates[.ArrowLeft] {
 
-            scene.camera.position += scene.camera.right * timeStep
+            scene.camera.position -= scene.camera.right * timeStep
         }
 
         if system.keyStates[.ArrowRight] {
 
-            scene.camera.position -= scene.camera.right * timeStep
+            scene.camera.position += scene.camera.right * timeStep
         }
 
         updateGUIContent()

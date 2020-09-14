@@ -7,6 +7,8 @@ public class MetaView: SingleChildWidget {
 
     @Observable private var cameraPositionText = "None"
 
+    @Observable private var cameraAngleText = "None"
+
     @Observable private var cameraForwardText = "None"
     
     @Observable private var cameraUpText = "None"
@@ -41,6 +43,13 @@ public class MetaView: SingleChildWidget {
                                     Text("Position:")
                                     
                                     Text($cameraPositionText)
+                                }
+
+                                Row {
+
+                                    Text("Angle:")
+
+                                    Text($cameraAngleText)
                                 }
 
                                 Row {
@@ -90,7 +99,9 @@ public class MetaView: SingleChildWidget {
     public func update() {
 
         cameraPositionText = generateVectorText(scene.camera.position)
-        
+
+        cameraAngleText = "Pitch: \(Int(scene.camera.pitch / 2 / Double.pi * 360)) Yaw: \(Int(scene.camera.yaw / 2 / Double.pi * 360))"
+
         cameraForwardText = generateVectorText(scene.camera.forward)
         
         cameraUpText = generateVectorText(scene.camera.up)

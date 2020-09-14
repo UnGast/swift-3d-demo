@@ -29,17 +29,27 @@ public class GLSceneRenderer {
 
         let camera = scene.camera
 
-        let cameraTransformation = Matrix4<GLMap.Float>([
+        let cameraTransformation = Matrix4<Float>([
 
-            camera.right.x, camera.up.x, camera.forward.x, camera.position.x,
+            camera.right.x, camera.up.x, camera.forward.x, 0,
 
-            camera.right.y, camera.up.y, camera.forward.y, camera.position.y,
+            camera.right.y, camera.up.y, camera.forward.y, 0,
 
-            camera.right.z, camera.up.z, camera.forward.z, camera.position.z,
+            camera.right.z, camera.up.z, camera.forward.z, 0,
 
             0, 0, 0, 1
 
-        ].map(Float.init))
+        ].map(Float.init)).matmul(Matrix4<Float>([
+
+            1, 0, 0, -camera.position.x,
+
+            0, 1, 0, -camera.position.y,
+
+            0, 0, 1, -camera.position.z,
+
+            0, 0, 0, 1
+
+        ].map(Float.init)))
 
         let near = 0.1
 

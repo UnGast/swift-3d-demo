@@ -194,7 +194,7 @@ public class GLVoxelRenderer {
         glDrawArrays(GLMap.TRIANGLES, 0, GLMap.Size(3))*/
 
 
-        //glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(voxels.count))
+        glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(voxels.count))
 
         glBindVertexArray(0)
     }

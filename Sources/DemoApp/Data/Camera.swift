@@ -12,12 +12,12 @@ public struct Camera {
 
     public var forward: DVec3 {
 
-        DVec3(x: tan(yaw), y: tan(pitch), z: 1).normalized()
+        DVec3(x: cos(yaw) * cos(pitch), y: sin(pitch), z: sin(yaw) * cos(pitch)).normalized()
     }
 
     public var right: DVec3 {
 
-        forward.cross(DVec3(0, 1, 0)).normalized()
+        DVec3(0, 1, 0).cross(forward).normalized()
     }
 
     public var up: DVec3 {
