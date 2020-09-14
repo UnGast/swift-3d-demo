@@ -7,7 +7,11 @@ public class MetaView: SingleChildWidget {
 
     @Observable private var cameraPositionText = "None"
 
-    @Observable private var cameraDirectionText = "None"
+    @Observable private var cameraForwardText = "None"
+    
+    @Observable private var cameraUpText = "None"
+    
+    @Observable private var cameraRightText = "None"
 
     public init(_ scene: Scene) {
 
@@ -16,26 +20,46 @@ public class MetaView: SingleChildWidget {
 
     override public func buildChild() -> Widget {
 
-        Background(fill: Color(50, 70, 80, 200)) { [unowned self] in
+        Background(fill: Color(50, 70, 80, 255)) { [unowned self] in
 
             Padding(all: 32) {
 
                 TextConfigProvider(fontSize: 24, fontWeight: .Bold, color: .White) {
 
                     Column(spacing: 16) {
-                        
-                        Row {
 
-                            Text("Position:")
+                        LabelledArea(label: "Camera") {
                             
-                            Text($cameraPositionText)
-                        }
+                            Column(spacing: 16) {
 
-                        Row {
+                                Row {
 
-                            Text("Direction:")
+                                    Text("Position:")
+                                    
+                                    Text($cameraPositionText)
+                                }
 
-                            Text($cameraDirectionText)
+                                Row {
+
+                                    Text("Forward:")
+
+                                    Text($cameraForwardText)
+                                }
+
+                                Row {
+
+                                    Text("Up:")
+
+                                    Text($cameraUpText)
+                                }
+
+                                Row {
+
+                                    Text("Right:")
+
+                                    Text($cameraRightText)
+                                }
+                            }
                         }
 
                         for (i, voxel) in scene.world.voxels.enumerated() {
@@ -59,12 +83,18 @@ public class MetaView: SingleChildWidget {
 
     public func update() {
 
-        cameraPositionText = """
-        x: \(scene.camera.position.x, format: "%.2f") y: \(scene.camera.position.y, format: "%.2f") z: \(scene.camera.position.z, format: "%.2f")
-        """
+        cameraPositionText = generateVectorText(scene.camera.position)
+        
+        cameraForwardText = generateVectorText(scene.camera.forward)
+        
+        cameraUpText = generateVectorText(scene.camera.up)
+        
+        cameraRightText = generateVectorText(scene.camera.right)
+    }
 
-        cameraDirectionText = """
-        x: \(scene.camera.forward.x, format: "%.2f") y: \(scene.camera.forward.y, format: "%.2f") z: \(scene.camera.forward.z, format: "%.2f")
+    private func generateVectorText(_ vector: DVec3) -> String {
+        return """
+        x: \(vector.x, format: "%.2f") y: \(vector.y, format: "%.2f") z: \(vector.z, format: "%.2f")
         """
     }
 }
