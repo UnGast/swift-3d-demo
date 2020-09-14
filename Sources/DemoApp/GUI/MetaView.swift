@@ -13,9 +13,13 @@ public class MetaView: SingleChildWidget {
     
     @Observable private var cameraRightText = "None"
 
+    @Observable private var camera: Camera
+
     public init(_ scene: Scene) {
 
         self.scene = scene
+
+        self.camera = scene.camera
     }
 
     override public func buildChild() -> Widget {
@@ -59,6 +63,8 @@ public class MetaView: SingleChildWidget {
 
                                     Text($cameraRightText)
                                 }
+
+                                CameraAxisView(camera: $camera)
                             }
                         }
 
@@ -90,9 +96,12 @@ public class MetaView: SingleChildWidget {
         cameraUpText = generateVectorText(scene.camera.up)
         
         cameraRightText = generateVectorText(scene.camera.right)
+
+        camera = scene.camera
     }
 
     private func generateVectorText(_ vector: DVec3) -> String {
+
         return """
         x: \(vector.x, format: "%.2f") y: \(vector.y, format: "%.2f") z: \(vector.z, format: "%.2f")
         """
