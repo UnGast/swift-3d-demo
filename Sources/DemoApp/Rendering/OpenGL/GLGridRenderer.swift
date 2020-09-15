@@ -139,7 +139,7 @@ public class GLGridRenderer {
 
             ].map(Float.init)).matmul(Matrix4<Float>([
 
-                axisConfig.positiveLength + axisConfig.negativeLength, 0, 0, 0,
+                axisConfig.positiveLength + axisConfig.negativeLength, 0, 0, -axisConfig.negativeLength,
 
                 0, 1, 0, 0,
 
@@ -238,7 +238,7 @@ public class GLGridRenderer {
         glBindBuffer(GLMap.ARRAY_BUFFER, 0)*/
     }
 
-    public func getLineVertices(from start: DVec3, to end: DVec3, orthogonalTo orthogonalDirection: DVec3, width: Double) -> [DVec3] {
+    /*public func getLineVertices(from start: DVec3, to end: DVec3, orthogonalTo orthogonalDirection: DVec3, width: Double) -> [DVec3] {
 
         let mainDirection = (start - end).normalized()
 
@@ -260,7 +260,7 @@ public class GLGridRenderer {
         ]
 
         return vertices
-    }
+    }*/
 
     public func render(scene: Scene, context: GLRenderContext) {
 
