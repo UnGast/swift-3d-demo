@@ -26,11 +26,11 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         let worldGenerator = WorldGenerator()
 
-        worldGenerator.size = DSize3(5, 10, 2)
+        worldGenerator.size = DSize3(10, 2, 10)
 
         let world = worldGenerator.generate()
 
-        scene = Scene(world: world, camera: Camera(position: DVec3(0, 10, 20), fov: 90))
+        scene = Scene(world: world, camera: Camera(position: DVec3(0, 3, 0), fov: 45))
 
 
 
@@ -93,7 +93,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
         if let event = event as? RawMouseMoveEvent {
             
-            scene.camera.yaw -= event.move.x * 0.001
+            scene.camera.yaw += event.move.x * 0.001
 
             //scene.camera.yaw = scene.camera.yaw.truncatingRemainder(dividingBy: 2 * Double.pi)
 

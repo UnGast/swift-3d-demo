@@ -15,6 +15,8 @@ public class MetaView: SingleChildWidget {
     
     @Observable private var cameraRightText = "None"
 
+    @Observable private var directionsDebugAngleText = "None"
+
     @Observable private var camera: Camera
 
     public init(_ scene: Scene) {
@@ -73,6 +75,13 @@ public class MetaView: SingleChildWidget {
                                     Text($cameraRightText)
                                 }
 
+                                Row {
+
+                                    Text("Directions Debug Angles:")
+
+                                    Text($directionsDebugAngleText)
+                                }
+
                                 CameraAxisView(camera: $camera)
                             }
                         }
@@ -108,6 +117,12 @@ public class MetaView: SingleChildWidget {
         
         cameraRightText = generateVectorText(scene.camera.right)
 
+        directionsDebugAngleText = """
+        (Forward, Up): \(getAngleDegrees(scene.camera.forward, scene.camera.up), format: "%.4f")
+        (Forward, Right): \(getAngleDegrees(scene.camera.forward, scene.camera.right), format: "%.4f")
+        (Right, Up): \(getAngleDegrees(scene.camera.right, scene.camera.up), format: "%.4f")
+        """
+
         camera = scene.camera
     }
 
@@ -116,5 +131,10 @@ public class MetaView: SingleChildWidget {
         return """
         x: \(vector.x, format: "%.2f") y: \(vector.y, format: "%.2f") z: \(vector.z, format: "%.2f")
         """
+    }
+    
+    private func getAngleDegrees(_ vector1: DVec3, _ vector2: DVec3) -> Double {
+
+        vector1.absAngle(to: vector2) / 2 / Double.pi * 360
     }
 }

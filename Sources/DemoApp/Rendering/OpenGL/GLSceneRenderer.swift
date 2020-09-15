@@ -31,11 +31,11 @@ public class GLSceneRenderer {
 
         let cameraTransformation = Matrix4<Float>([
 
-            camera.right.x, camera.up.x, camera.forward.x, 0,
+            camera.right.x, camera.right.y, camera.right.z, 0,
 
-            camera.right.y, camera.up.y, camera.forward.y, 0,
+            camera.up.x, camera.up.y, camera.up.z, 0,
 
-            camera.right.z, camera.up.z, camera.forward.z, 0,
+            camera.forward.x, camera.forward.y, camera.forward.z, 0,
 
             0, 0, 0, 1
 
