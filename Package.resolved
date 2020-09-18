@@ -47,6 +47,15 @@
         }
       },
       {
+        "package": "GraphicalSwift",
+        "repositoryURL": "https://github.com/UnGast/swift-cross-platform-gui-example",
+        "state": {
+          "branch": "master",
+          "revision": "3f8968f1d5e7fa3ee76921ca3e6ddb7769463394",
+          "version": null
+        }
+      },
+      {
         "package": "GL",
         "repositoryURL": "https://github.com/UnGast/swift-opengl.git",
         "state": {

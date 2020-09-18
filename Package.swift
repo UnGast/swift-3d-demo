@@ -15,7 +15,7 @@ let package = Package(
 
     dependencies: [
 
-        .package(name: "GraphicalSwift", path: "../swift-gui-demo-app"),
+        .package(name: "GraphicalSwift", url: "https://github.com/UnGast/swift-cross-platform-gui-example", .branch("master")),
         .package(name: "GL", url: "https://github.com/UnGast/swift-opengl.git", .branch("master"))
     ],
 
