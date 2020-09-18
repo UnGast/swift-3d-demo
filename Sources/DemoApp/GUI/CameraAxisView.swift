@@ -9,6 +9,13 @@ public class CameraAxisView: Widget {
     public init(camera: Observable<Camera>) {
 
         self._camera = camera
+
+        super.init()
+
+        _ = self.onDestroy(self._camera.onChanged { [unowned self] _ in
+
+            invalidateRenderState()
+        })
     }
 
     override public func getBoxConfig() -> BoxConfig {

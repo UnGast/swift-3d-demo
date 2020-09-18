@@ -6,6 +6,11 @@ import WidgetGUI
 
 public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVGWindow> {
 
+    private enum ControlTarget {
+
+        case Scene, UI
+    }
+
     private var window: Window
 
     private let scene: Scene
@@ -19,6 +24,21 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
     @Reference private var metaView: MetaView
 
     @Observable private var cameraPositionText = ""
+
+    private var controlTarget: ControlTarget = .Scene {
+
+        didSet {
+
+            if controlTarget == .UI {
+
+                system.relativeMouseMode = false
+
+            } else if controlTarget == .Scene {
+
+                system.relativeMouseMode = true
+            }
+        }
+    }
 
 
 
@@ -68,6 +88,8 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
         _ = window.onResize { [unowned self] _ in updateGUIBounds() }
 
         _ = window.onMouse(handleMouseEvent)
+
+        _ = window.onKey(handleKeyEvent)
     }
 
     private func buildGUI() -> Root {
@@ -89,24 +111,47 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func handleMouseEvent(_ event: RawMouseEvent) {
 
-        guiRoot.consume(event)
-
-        if let event = event as? RawMouseMoveEvent {
+        if controlTarget == .UI {
             
-            scene.camera.yaw += event.move.x * 0.001
+            guiRoot.consume(event)
 
-            //scene.camera.yaw = scene.camera.yaw.truncatingRemainder(dividingBy: 2 * Double.pi)
+        } else if controlTarget == .Scene {
 
-            scene.camera.pitch += event.move.y * 0.001
+            if let event = event as? RawMouseMoveEvent {
+                
+                scene.camera.yaw += event.move.x * 0.001
 
-            if scene.camera.pitch > Double.pi / 2 * 0.9 {
+                //scene.camera.yaw = scene.camera.yaw.truncatingRemainder(dividingBy: 2 * Double.pi)
 
-                scene.camera.pitch = Double.pi / 2 * 0.9
+                scene.camera.pitch += event.move.y * 0.001
+
+                if scene.camera.pitch > Double.pi / 2 * 0.9 {
+
+                    scene.camera.pitch = Double.pi / 2 * 0.9
+                }
+
+                if scene.camera.pitch < -Double.pi / 2 * 0.9 {
+
+                    scene.camera.pitch = -Double.pi / 2 * 0.9
+                }
             }
+        }
+    }
 
-            if scene.camera.pitch < -Double.pi / 2 * 0.9 {
+    private func handleKeyEvent(_ event: KeyEvent) {
 
-                scene.camera.pitch = -Double.pi / 2 * 0.9
+        if let event = event as? KeyDownEvent {
+
+            if event.key == .Escape {
+
+                if controlTarget == .Scene {
+
+                    controlTarget = .UI
+
+                } else if controlTarget == .UI {
+
+                    controlTarget = .Scene
+                }
             }
         }
     }

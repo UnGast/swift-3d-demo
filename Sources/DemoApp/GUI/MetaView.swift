@@ -32,7 +32,7 @@ public class MetaView: SingleChildWidget {
 
             Padding(all: 32) {
 
-                TextConfigProvider(fontSize: 24, fontWeight: .Bold, color: .White) {
+                TextConfigProvider(fontSize: 16, fontWeight: .Regular, color: .White) {
 
                     Column(spacing: 16) {
 
@@ -86,13 +86,22 @@ public class MetaView: SingleChildWidget {
                             }
                         }
 
-                        for (i, voxel) in scene.world.voxels.enumerated() {
+                        LabelledArea(label: "Voxels") {
 
-                            MouseArea {
-                                
-                                Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
+                            ScrollArea {
 
-                            } onClick: { _ in handleVoxelClick(i) }
+                                Column {
+
+                                    for (i, voxel) in scene.world.voxels.enumerated() {
+
+                                        MouseArea {
+                                            
+                                            Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
+
+                                        } onClick: { _ in handleVoxelClick(i) }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
