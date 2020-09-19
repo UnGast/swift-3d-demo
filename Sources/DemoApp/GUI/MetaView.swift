@@ -21,6 +21,8 @@ public class MetaView: SingleChildWidget {
 
     @Observable private var camera: Camera
 
+    @Reference private var voxelListWidget: ListView<Voxel>
+
     public init(_ scene: Scene) {
 
         self.scene = scene
@@ -99,13 +101,11 @@ public class MetaView: SingleChildWidget {
 
                             ScrollArea {
 
-                                Column {
+                                ListView(items: scene.world.voxels) {
 
-                                    for voxel in scene.world.voxels {
+                                    buildVoxelEntry($0)
 
-                                        buildVoxelEntry(voxel)
-                                    }
-                                }
+                                }.connect(ref: $voxelListWidget)
                             }
                         }
                     }
@@ -160,6 +160,16 @@ public class MetaView: SingleChildWidget {
         """
 
         camera = scene.camera
+
+        for event in worldEventBuffer {
+
+            if case let .VoxelUpdated(voxel) = event {
+                
+                voxelListWidget.updateItems(scene.world.voxels)
+
+                break
+            }
+        }
 
         worldEventBuffer = []
     }
