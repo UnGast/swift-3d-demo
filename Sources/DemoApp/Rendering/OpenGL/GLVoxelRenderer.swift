@@ -144,11 +144,15 @@ public class GLVoxelRenderer {
             glGenBuffers(1, &instanceDataBuffer)
             glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
 
-            let instanceDataStride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 3)
+            let instanceDataStride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 4)
 
             glVertexAttribPointer(2, 3, GLMap.FLOAT, false, instanceDataStride, UnsafeRawPointer(bitPattern: 0))
             glEnableVertexAttribArray(2)
             glVertexAttribDivisor(2, 1)
+
+            glVertexAttribPointer(3, 1, GLMap.FLOAT, false, instanceDataStride, UnsafeRawPointer(bitPattern: 3))
+            glEnableVertexAttribArray(3)
+            glVertexAttribDivisor(3, 1)
 
 
             glBindVertexArray(0)
@@ -176,7 +180,18 @@ public class GLVoxelRenderer {
 
         glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
 
-        let instanceData = voxels.flatMap { $0.position.elements.map(Float.init) }
+        let instanceData = voxels.flatMap {
+
+            $0.position.elements.map(Float.init) + [$0.highlighted ? Float(1) : Float(0)]
+        }
+
+        for voxel in voxels {
+
+            if voxel.highlighted {
+
+                print("HAVE HIGHLIGHTED VOXEL")
+            }
+        }
 
         glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * instanceData.count, instanceData, GLMap.DYNAMIC_DRAW)
 
@@ -211,22 +226,38 @@ extension GLVoxelRenderer {
 
     layout (location = 2) in vec3 translation;
 
+    layout (location = 3) in float highlighted;
+
     uniform mat4 viewTransformation;
 
-    out vec3 Normal;
+    out VERTEXOUT {
+
+        vec3 normal;
+
+        float highlighted;
+
+    } vertexOut;
 
     void main() {
         
         gl_Position = viewTransformation * vec4(vertexPosition + translation, 1);
 
-        Normal = vertexNormal;
+        vertexOut.normal = vertexNormal;
+
+        vertexOut.highlighted = highlighted;
     }
     """
 
     private static let fragmentSource = """
     #version 330 core
 
-    in vec3 Normal;
+    in VERTEXOUT{
+
+        vec3 normal;
+
+        float highlighted;
+
+    } vertexOut;
 
     //in float Highlighted;
 
@@ -234,7 +265,14 @@ extension GLVoxelRenderer {
 
     void main() {
 
-        FragColor = vec4((dot(Normal, vec3(1, 1, 0)) + 0.2) * vec3(1.0, 1.0, 1.0), 1.0);
+        if (vertexOut.highlighted > 0) {
+
+            FragColor = vec4(0, 1,  0, 1);
+
+        } else {
+
+            FragColor = vec4((max(0, dot(vertexOut.normal, vec3(1, 1, 0))) * 0.6 + 0.3) * vec3(1.0, 1.0, 1.0), 1.0);
+        }
     }
     """
 }

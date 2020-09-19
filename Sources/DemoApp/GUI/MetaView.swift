@@ -5,6 +5,8 @@ public class MetaView: SingleChildWidget {
 
     private let scene: Scene
 
+    private var worldEventBuffer: [World.Event] = []
+
     @Observable private var cameraPositionText = "None"
 
     @Observable private var cameraAngleText = "None"
@@ -24,6 +26,13 @@ public class MetaView: SingleChildWidget {
         self.scene = scene
 
         self.camera = scene.camera
+
+        super.init()
+
+        _ = self.scene.world.onEvent { [unowned self] in
+
+            worldEventBuffer.append($0)
+        }
     }
 
     override public func buildChild() -> Widget {
@@ -92,13 +101,9 @@ public class MetaView: SingleChildWidget {
 
                                 Column {
 
-                                    for (i, voxel) in scene.world.voxels.enumerated() {
+                                    for voxel in scene.world.voxels {
 
-                                        MouseArea {
-                                            
-                                            Text("Voxel at x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
-
-                                        } onClick: { _ in handleVoxelClick(i) }
+                                        buildVoxelEntry(voxel)
                                     }
                                 }
                             }
@@ -109,9 +114,31 @@ public class MetaView: SingleChildWidget {
         }
     }
 
-    private func handleVoxelClick(_ i: Int) {
+    private func buildVoxelEntry(_ voxel: Voxel) -> Widget {
 
-        scene.world.voxels[i].highlighted = true
+        Background(fill: voxel.highlighted ? .Green : .Transparent) { [unowned self] in
+
+            MouseArea {
+                                                
+                Padding(all: 16) {
+
+                    Row {
+
+                        Text("x: \(voxel.position.x) y: \(voxel.position.y) z: \(voxel.position.z)")
+                    }
+                }
+
+            } onClick: { _ in handleVoxelClick(voxel) }
+        }
+    }
+
+    private func handleVoxelClick(_ voxel: Voxel) {
+
+        var updatedVoxel = voxel
+
+        updatedVoxel.highlighted = true
+
+        scene.world.updateVoxel(updatedVoxel)
     }
 
     public func update() {
@@ -133,6 +160,8 @@ public class MetaView: SingleChildWidget {
         """
 
         camera = scene.camera
+
+        worldEventBuffer = []
     }
 
     private func generateVectorText(_ vector: DVec3) -> String {
