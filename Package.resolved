@@ -47,20 +47,20 @@
         }
       },
       {
+        "package": "GraphicalSwift",
+        "repositoryURL": "https://github.com/UnGast/swift-cross-platform-gui-example",
+        "state": {
+          "branch": "master",
+          "revision": "3f8968f1d5e7fa3ee76921ca3e6ddb7769463394",
+          "version": null
+        }
+      },
+      {
         "package": "GL",
         "repositoryURL": "https://github.com/UnGast/swift-opengl.git",
         "state": {
           "branch": "master",
           "revision": "5cffdfff5ae39aabddf093cfa084f55270b3cb2a",
-          "version": null
-        }
-      },
-      {
-        "package": "XML",
-        "repositoryURL": "https://github.com/kelvin13/swiftxml",
-        "state": {
-          "branch": "master",
-          "revision": "91ae89c58e5a478191c27d44c31bd9bae281fefd",
           "version": null
         }
       },

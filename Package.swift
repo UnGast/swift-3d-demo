@@ -9,20 +9,20 @@ let package = Package(
     products: [
 
         .executable(
-            name: "Demo3DGameApp",
-            targets: ["Demo3DGameApp"]),
+            name: "DemoApp",
+            targets: ["DemoApp"]),
     ],
 
     dependencies: [
 
-        .package(name: "GraphicalSwift", path: "../swift-gui-demo-app"),
+        .package(name: "GraphicalSwift", url: "https://github.com/UnGast/swift-cross-platform-gui-example", .branch("master")),
         .package(name: "GL", url: "https://github.com/UnGast/swift-opengl.git", .branch("master"))
     ],
 
     targets: [
        
         .target(
-            name: "Demo3DGameApp",
+            name: "DemoApp",
             dependencies: ["GraphicalSwift", "GL"])
     ]
 )
