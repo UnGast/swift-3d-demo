@@ -50,8 +50,15 @@ public class GLGridRenderer {
 
     private var lineCount = 0
 
+    private var lines: [DrawableLine] = []
 
-    public init() {}
+    private let lineRenderer: GLLineRenderer
+
+
+    public init() {
+
+        lineRenderer = GLLineRenderer()
+    }
 
 
     public func setup() {
@@ -59,6 +66,8 @@ public class GLGridRenderer {
         do {
 
             try shaderProgram.compile()
+
+            try lineRenderer.setup()
 
         } catch {
 
@@ -125,6 +134,8 @@ public class GLGridRenderer {
 
         var colors = [Float]()
 
+        lines = [DrawableLine]()
+
         for (i, axisConfig) in axisConfigs.enumerated() {
 
             let baseAxisLineTransformation = Matrix4<Float>([
@@ -149,6 +160,17 @@ public class GLGridRenderer {
 
             ].map(Float.init)))
 
+            lines.append(DrawableLine(
+                
+                start: axisConfig.direction * axisConfig.positiveLength,
+                
+                end: -axisConfig.direction * axisConfig.negativeLength,
+
+                thickness: 2,
+
+                color: .Yellow
+            ))
+            
             lineTransformations.append(contentsOf: baseAxisLineTransformation.transposed().elements)
 
             colors.append(contentsOf: [axisConfig.color.glR, axisConfig.color.glG, axisConfig.color.glB, axisConfig.color.glA])
@@ -209,6 +231,8 @@ public class GLGridRenderer {
         glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * colors.count, colors, GLMap.STATIC_DRAW)
         
         glBindBuffer(GLMap.ARRAY_BUFFER, 0)
+
+        lineRenderer.updateBuffers(lines: lines)
 
         /*glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
 
@@ -309,6 +333,9 @@ public class GLGridRenderer {
 
 
         glBindVertexArray(0)
+
+
+        lineRenderer.render(context: context)
     }
 }
 

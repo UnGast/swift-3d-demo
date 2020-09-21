@@ -7,5 +7,6 @@ public struct GLRenderContext {
 
     public var projectionTransformation: Matrix4<Float> = .zero
 
+    // TODO: maybe rename camera to viewTransformation and viewTransformation to viewProjectionTransformation
     public var viewTransformation: Matrix4<Float> = .zero
 }
