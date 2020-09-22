@@ -13,11 +13,11 @@ public class GLVoxelRenderer {
 
     private var vao: GLMap.UInt = 0
 
-    private var vbo: GLMap.UInt = 0
+    private var vertexBuffer = GLBuffer()
 
-    private var ebo: GLMap.UInt = 0
+    private var indexBuffer = GLBuffer()
 
-    private var instanceDataBuffer: GLMap.UInt = 0
+    private var instanceBuffer = GLBuffer()
 
     private static var vertices: [Vertex] = [
 
@@ -122,15 +122,16 @@ public class GLVoxelRenderer {
             glGenVertexArrays(1, &vao)
             glBindVertexArray(vao)
 
-
-            glGenBuffers(1, &vbo)
-            glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
+            
+            vertexBuffer.setup()
+            vertexBuffer.bind(GLMap.ARRAY_BUFFER)
             let vertexBufferData = GLVoxelRenderer.vertices.flatMap { $0.position.elements.map(Float.init) + $0.normal.elements.map(Float.init) }
-            glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * vertexBufferData.count, vertexBufferData, GLMap.STATIC_DRAW)
+            vertexBuffer.store(vertexBufferData)
 
-            glGenBuffers(1, &ebo)
-            glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, ebo)
-            glBufferData(GLMap.ELEMENT_ARRAY_BUFFER, MemoryLayout<GLMap.UInt>.size * GLVoxelRenderer.indices.count, GLVoxelRenderer.indices, GLMap.STATIC_DRAW)
+            indexBuffer.setup()
+            indexBuffer.bind(GLMap.ELEMENT_ARRAY_BUFFER)
+            indexBuffer.store(GLVoxelRenderer.indices)
+
 
             let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 6)
 
@@ -141,8 +142,8 @@ public class GLVoxelRenderer {
             glEnableVertexAttribArray(1)
 
 
-            glGenBuffers(1, &instanceDataBuffer)
-            glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
+            instanceBuffer.setup()
+            instanceBuffer.bind(GLMap.ARRAY_BUFFER)
 
             let instanceDataStride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 4)
 
@@ -178,8 +179,6 @@ public class GLVoxelRenderer {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
 
 
-        glBindBuffer(GLMap.ARRAY_BUFFER, instanceDataBuffer)
-
         let instanceData = voxels.flatMap {
 
             $0.position.elements.map(Float.init) + [$0.highlighted ? Float(1) : Float(0)]
@@ -193,7 +192,9 @@ public class GLVoxelRenderer {
             }
         }
 
-        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * instanceData.count, instanceData, GLMap.DYNAMIC_DRAW)
+        instanceBuffer.bind(GLMap.ARRAY_BUFFER)
+
+        instanceBuffer.store(instanceData)
 
         /*let testData: [GLMap.Float] = [
 
