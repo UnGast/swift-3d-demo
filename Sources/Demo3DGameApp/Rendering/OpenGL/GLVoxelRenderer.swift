@@ -11,7 +11,7 @@ public class GLVoxelRenderer {
         fragment: GLVoxelRenderer.fragmentSource
     )
 
-    private var vao: GLMap.UInt = 0
+    lazy private var vertexArray = setupVertexArray()
 
     private var vertexBuffer = GLBuffer()
 
@@ -112,6 +112,64 @@ public class GLVoxelRenderer {
     public var viewTransformation: Matrix4<Float> = .zero
 
 
+    private func setupVertexArray() -> GLVertexArray {
+
+        vertexBuffer.setup()
+
+        indexBuffer.setup()
+
+        instanceBuffer.setup()
+
+        return GLVertexArray(attributes: [
+
+            GLVertexArray.ContiguousAttributes(buffer: vertexBuffer, indexBuffer: indexBuffer, attributes: [
+
+                GLVertexAttribute(
+
+                    location: 0,
+
+                    dataType: Float.self,
+
+                    length: 3
+                ),
+
+                GLVertexAttribute(
+
+                    location: 1,
+
+                    dataType: Float.self,
+
+                    length: 3
+                ),
+            ]),
+
+            GLVertexArray.ContiguousAttributes(buffer: instanceBuffer, attributes: [
+
+                GLVertexAttribute(
+
+                    location: 2,
+
+                    dataType: Float.self,
+
+                    length: 3,
+
+                    divisor: 1
+                ),
+
+                GLVertexAttribute(
+
+                    location: 3,
+
+                    dataType: Float.self,
+
+                    length: 1,
+
+                    divisor: 1
+                ),
+            ])
+        ])
+    }
+
     public func setup() {
 
         do {
@@ -119,49 +177,15 @@ public class GLVoxelRenderer {
             try shaderProgram.compile()
 
 
-            glGenVertexArrays(1, &vao)
-            glBindVertexArray(vao)
+            vertexArray.setup()
 
             
-            vertexBuffer.setup()
             vertexBuffer.bind(GLMap.ARRAY_BUFFER)
             let vertexBufferData = GLVoxelRenderer.vertices.flatMap { $0.position.elements.map(Float.init) + $0.normal.elements.map(Float.init) }
             vertexBuffer.store(vertexBufferData)
 
-            indexBuffer.setup()
             indexBuffer.bind(GLMap.ELEMENT_ARRAY_BUFFER)
             indexBuffer.store(GLVoxelRenderer.indices)
-
-
-            let stride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 6)
-
-            glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: 0))
-            glEnableVertexAttribArray(0)
-
-            glVertexAttribPointer(1, 3, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<GLMap.Float>.size * 3))
-            glEnableVertexAttribArray(1)
-
-
-            instanceBuffer.setup()
-            instanceBuffer.bind(GLMap.ARRAY_BUFFER)
-
-            let instanceDataStride = GLMap.Size(MemoryLayout<GLMap.Float>.size * 4)
-
-            glVertexAttribPointer(2, 3, GLMap.FLOAT, false, instanceDataStride, UnsafeRawPointer(bitPattern: 0))
-            glEnableVertexAttribArray(2)
-            glVertexAttribDivisor(2, 1)
-
-            glVertexAttribPointer(3, 1, GLMap.FLOAT, false, instanceDataStride, UnsafeRawPointer(bitPattern: 3))
-            glEnableVertexAttribArray(3)
-            glVertexAttribDivisor(3, 1)
-
-
-            glBindVertexArray(0)
-
-            glBindBuffer(GLMap.ELEMENT_ARRAY_BUFFER, 0)
-
-            glBindBuffer(GLMap.ARRAY_BUFFER, 0)
-
 
         } catch {
 
@@ -173,7 +197,7 @@ public class GLVoxelRenderer {
 
         shaderProgram.use()
 
-        glBindVertexArray(vao)
+        vertexArray.bind()
 
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)

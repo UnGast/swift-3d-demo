@@ -7,7 +7,7 @@ public protocol GLVertexAttributeProtocol {
     func setup(stride: Int, offset: Int)        
 }
 
-public struct GLVertexAttribute<DataType>: GLVertexAttributeProtocol {
+public class GLVertexAttribute<DataType>: GLVertexAttributeProtocol {
 
     public var location: UInt
 
@@ -29,9 +29,22 @@ public struct GLVertexAttribute<DataType>: GLVertexAttributeProtocol {
 
     public var length: Int
 
+    public var divisor: UInt
+
     public var dataSize: Int {
 
         MemoryLayout<DataType>.size * length
+    }
+
+    public init(location: UInt, dataType: DataType.Type, length: Int, divisor: UInt = 0) {
+
+        self.location = location
+        
+        self.dataType = dataType
+
+        self.length = length
+
+        self.divisor = divisor
     }
 
     public func setup(stride: Int, offset: Int) {
@@ -51,5 +64,7 @@ public struct GLVertexAttribute<DataType>: GLVertexAttributeProtocol {
             pointer: UnsafeRawPointer(bitPattern: offset))
 
         glEnableVertexAttribArray(GLMap.UInt(location))
+
+        glVertexAttribDivisor(GLMap.UInt(location), GLMap.UInt(divisor))
     } 
 }

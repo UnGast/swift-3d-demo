@@ -1,6 +1,6 @@
 import GL
 
-public struct GLBuffer {
+public class GLBuffer {
 
     public var handle = GLMap.UInt()
 
@@ -15,7 +15,7 @@ public struct GLBuffer {
 
     }
 
-    mutating public func setup() {
+    public func setup() {
 
         glGenBuffers(1, &handle)
     }
@@ -30,7 +30,7 @@ public struct GLBuffer {
         glBufferData(boundTarget, MemoryLayout<T>.size * data.count, data, GLMap.STATIC_DRAW)
     }
 
-    mutating public func bind(_ target: GLMap.Int) {
+    public func bind(_ target: GLMap.Int) {
 
         glBindBuffer(target, handle)
 

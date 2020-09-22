@@ -55,29 +55,10 @@ public class GLLineRenderer {
         try shaderProgram.compile()
 
         vertexArray.setup()
-
-        /*glGenVertexArrays(1, &vao)
-        glBindVertexArray(vao)
-
-        glGenBuffers(1, &vbo)
-        glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
-
-        let stride = GLMap.Size(MemoryLayout<Float>.size * 7)
-
-        glVertexAttribPointer(0, 3, GLMap.FLOAT, false, stride, nil)
-        glEnableVertexAttribArray(0)
-
-        glVertexAttribPointer(1, 4, GLMap.FLOAT, false, stride, UnsafeRawPointer(bitPattern: MemoryLayout<Float>.size * 3))
-        glEnableVertexAttribArray(1)
-
-        glBindVertexArray(0)
-        glBindBuffer(GLMap.ARRAY_BUFFER, 0)        */
     }
 
     public func updateBuffers(lines: [DrawableLine]) {
 
-        //glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
-        
         var vertexData: [Float] = []
 
         for line in lines {
@@ -95,10 +76,6 @@ public class GLLineRenderer {
 
         vertexBuffer.store(vertexData)
 
-        //glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * vertexData.count, vertexData, GLMap.STATIC_DRAW)
-
-        //glBindBuffer(GLMap.ARRAY_BUFFER, 0)
-
         lineCount = lines.count
     }
 
@@ -106,7 +83,6 @@ public class GLLineRenderer {
         
         shaderProgram.use()
 
-        //glBindVertexArray(vao)
         vertexArray.bind()
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewProjectionTransformation"), 1, true, context.viewTransformation.elements)
