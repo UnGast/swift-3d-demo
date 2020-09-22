@@ -11,17 +11,52 @@ public class GLLineRenderer {
         fragment: fragmentSource
     )
 
-    private var vao = GLMap.UInt()
+    lazy private var vertexArray = buildVertexArray()
 
-    private var vbo = GLMap.UInt()
+    lazy private var vertexBuffer = GLBuffer()
+
+    /*private var vao = GLMap.UInt()
+
+    private var vbo = GLMap.UInt()*/
 
     private var lineCount: Int = 0
+
+    private func buildVertexArray() -> GLVertexArray {
+
+        vertexBuffer.setup()
+
+        return GLVertexArray(attributes: [
+
+            GLVertexArray.ContiguousAttributes(buffer: vertexBuffer, attributes: [
+
+                GLVertexAttribute(
+                    
+                    location: 0, 
+
+                    dataType: Float.self,
+
+                    length: 3
+                ),
+
+                GLVertexAttribute(
+
+                    location: 1,
+
+                    dataType: Float.self,
+
+                    length: 4
+                )
+            ])
+        ])
+    }
 
     public func setup() throws {
 
         try shaderProgram.compile()
 
-        glGenVertexArrays(1, &vao)
+        vertexArray.setup()
+
+        /*glGenVertexArrays(1, &vao)
         glBindVertexArray(vao)
 
         glGenBuffers(1, &vbo)
@@ -36,12 +71,12 @@ public class GLLineRenderer {
         glEnableVertexAttribArray(1)
 
         glBindVertexArray(0)
-        glBindBuffer(GLMap.ARRAY_BUFFER, 0)        
+        glBindBuffer(GLMap.ARRAY_BUFFER, 0)        */
     }
 
     public func updateBuffers(lines: [DrawableLine]) {
 
-        glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
+        //glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
         
         var vertexData: [Float] = []
 
@@ -56,9 +91,13 @@ public class GLLineRenderer {
             vertexData.append(contentsOf: line.color.gl)
         }
 
-        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * vertexData.count, vertexData, GLMap.STATIC_DRAW)
+        vertexBuffer.bind(GLMap.ARRAY_BUFFER)
 
-        glBindBuffer(GLMap.ARRAY_BUFFER, 0)
+        vertexBuffer.store(vertexData)
+
+        //glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<GLMap.Float>.size * vertexData.count, vertexData, GLMap.STATIC_DRAW)
+
+        //glBindBuffer(GLMap.ARRAY_BUFFER, 0)
 
         lineCount = lines.count
     }
@@ -67,7 +106,8 @@ public class GLLineRenderer {
         
         shaderProgram.use()
 
-        glBindVertexArray(vao)
+        //glBindVertexArray(vao)
+        vertexArray.bind()
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewProjectionTransformation"), 1, true, context.viewTransformation.elements)
         
