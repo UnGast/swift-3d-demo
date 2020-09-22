@@ -8,8 +8,6 @@ public class GLLineRenderer {
 
         vertex: vertexSource,
         
-        geometry: geometrySource,
-        
         fragment: fragmentSource
     )
 
@@ -106,7 +104,7 @@ extension GLLineRenderer {
     }
     """
 
-    private static let geometrySource = """
+    /*private static let geometrySource = """
     #version 330 core
 
     layout (lines) in;
@@ -133,18 +131,22 @@ extension GLLineRenderer {
 
         EndPrimitive();
     }
-    """
+    """*/
 
     private static let fragmentSource = """
     #version 330 core
 
-    in vec4 color;
+    in VERTEX_OUT {
+
+        vec4 color;
+
+    } fs_in;
 
     out vec4 FragColor;
 
     void main() {
 
-        FragColor = color;
+        FragColor = fs_in.color;
     }
     """
 }
