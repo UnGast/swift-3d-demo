@@ -68,7 +68,14 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
 
 
-        sceneRenderer.setup()
+        do {
+
+            try sceneRenderer.setup()
+
+        } catch {
+
+            fatalError("Error during setup of SceneRenderer: \(error)")
+        }
 
         guiRoot.context = WidgetContext(
 

@@ -18,11 +18,11 @@ public class GLSceneRenderer {
         self.gridRenderer = GLGridRenderer()
     }
 
-    public func setup() {
+    public func setup() throws {
 
         voxelRenderer.setup()
 
-        gridRenderer.setup()
+        try gridRenderer.setup()
     }
 
     public func render() {
