@@ -11,13 +11,26 @@ public class GLLineRenderer {
         fragment: fragmentSource
     )
 
+    private static let vertices: [Float] = [
+
+        -1, 0, 1,
+
+        1, 0, 1,
+
+        1, 0, -1,
+
+        -1, 0, 1,
+
+        1, 0, -1,
+
+        -1, 0, -1
+    ]
+
     lazy private var vertexArray = buildVertexArray()
 
-    lazy private var vertexBuffer = GLBuffer()
+    private var vertexBuffer = GLBuffer()
 
-    /*private var vao = GLMap.UInt()
-
-    private var vbo = GLMap.UInt()*/
+    private var instanceBuffer = GLBuffer()
 
     private var lineCount: Int = 0
 
@@ -25,27 +38,26 @@ public class GLLineRenderer {
 
         vertexBuffer.setup()
 
+        instanceBuffer.setup()
+
         return GLVertexArray(attributes: [
 
             GLVertexArray.ContiguousAttributes(buffer: vertexBuffer, attributes: [
 
-                GLVertexAttribute(
-                    
-                    location: 0, 
+                GLVertexAttribute(location: 0, dataType: Float.self, length: 3)
+            ]),
 
-                    dataType: Float.self,
+            GLVertexArray.ContiguousAttributes(buffer: instanceBuffer, attributes: [
 
-                    length: 3
-                ),
+                GLVertexAttribute(location: 1, dataType: Float.self, length: 4, divisor: 1),
 
-                GLVertexAttribute(
+                GLVertexAttribute(location: 2, dataType: Float.self, length: 4, divisor: 1),
 
-                    location: 1,
+                GLVertexAttribute(location: 3, dataType: Float.self, length: 4, divisor: 1),
 
-                    dataType: Float.self,
-
-                    length: 4
-                )
+                GLVertexAttribute(location: 4, dataType: Float.self, length: 4, divisor: 1),
+                
+                GLVertexAttribute(location: 5, dataType: Float.self, length: 4, divisor: 1)
             ])
         ])
     }
@@ -55,26 +67,124 @@ public class GLLineRenderer {
         try shaderProgram.compile()
 
         vertexArray.setup()
+
+        vertexBuffer.bind(GLMap.ARRAY_BUFFER)
+
+        vertexBuffer.store(Self.vertices)
     }
 
     public func updateBuffers(lines: [DrawableLine]) {
 
-        var vertexData: [Float] = []
+        var instanceData: [Float] = []
 
         for line in lines {
 
-            vertexData.append(contentsOf: line.start.elements.map(Float.init))
+            var direction = line.end - line.start
 
-            vertexData.append(contentsOf: line.color.gl)
+            let length = direction.magnitude
 
-            vertexData.append(contentsOf: line.end.elements.map(Float.init))
+            direction = direction.normalized()
 
-            vertexData.append(contentsOf: line.color.gl)
+            var nonZeroComponent = 0
+
+            for i in 0..<direction.count {
+
+                if direction[i] != 0 {
+
+                    nonZeroComponent = i
+
+                    break
+                }
+            }
+
+            let otherComponents = [0, 1, 2].filter { $0 != nonZeroComponent }
+
+            //print("NON ZERO COMPONENT", direction, nonZeroComponent, otherComponents)
+
+            var crossDirection = DVec3(1, 1, 1)
+
+            crossDirection[nonZeroComponent] = otherComponents.reduce(into: 0, {
+
+                $0 -= direction[$1]
+
+            }) / direction[nonZeroComponent]
+
+            crossDirection = crossDirection.normalized()
+
+            print("DIRECTION", direction)
+
+            print("CROSS DIRECTION", crossDirection.elements)
+
+            let thirdDirection = crossDirection.cross(direction).normalized()
+
+            print("THIRD DIRECTION", thirdDirection.elements)
+
+            var transformation = Matrix4([
+
+                Float(length) / 2, 0, 0, 0,
+
+                0, 1, 0, 0,
+
+                0, 0, Float(line.thickness) / 2, 0,
+
+                0, 0, 0, 1
+
+            ])
+
+            transformation = Matrix4([
+
+                direction.x, thirdDirection.x, crossDirection.x, 0,
+
+                direction.y, thirdDirection.y, crossDirection.y, 0, 
+
+                direction.z, thirdDirection.z, crossDirection.z, 0,
+
+                0, 0, 0, 1
+                
+            ].map(Float.init)).matmul(transformation)
+
+            /*transformation = Matrix4([
+
+                0, 0, 20, 0,
+
+                -0.7, 0.7, 0, 0,
+
+                0.7, 0.7, 0, 0,
+
+                0, 0, 0, 1
+
+            ]).transposed().matmul(transformation)*/
+
+            print("GOT TRANSFORMATION MATRIX", transformation.elements, direction.elements)
+
+            //print("WOULD RESULT IN", transformation.matmul(FVec4(-1, 0, -1, 1)).elements)
+
+            let referenceTransformedStartPoint = DVec3(transformation.matmul(FVec4(1, 0, 0, 1)).elements[0..<3].map(Double.init))
+
+            let translation = line.start - referenceTransformedStartPoint
+
+            /*transformation = Matrix4([
+
+                1, 0, 0, translation.x,
+
+                0, 1, 0, translation.y,
+
+                0, 0, 1, translation.z,
+
+                0, 0, 0, 1
+
+            ].map(Float.init)).matmul(transformation)*/
+
+            // print("THE TRANSFORMATION MATIRXI OIS:", transformation.elements)
+
+            instanceData.append(contentsOf: transformation.transposed().elements)
+
+            instanceData.append(contentsOf: line.color.gl)
         }
 
-        vertexBuffer.bind(GLMap.ARRAY_BUFFER)
+        instanceBuffer.bind(GLMap.ARRAY_BUFFER)
 
-        vertexBuffer.store(vertexData)
+        instanceBuffer.store(instanceData)
 
         lineCount = lines.count
     }
@@ -89,7 +199,9 @@ public class GLLineRenderer {
         
         glLineWidth(20.0)
 
-        glDrawArrays(GLMap.LINES, 0, GLMap.Int(lineCount * 2))
+        glEnable(GLMap.DEPTH_TEST)
+
+        glDrawArraysInstanced(GLMap.TRIANGLES, 0, GLMap.Int(Self.vertices.count), GLMap.Size(lineCount))
 
         glBindVertexArray(0)
     }
@@ -102,7 +214,9 @@ extension GLLineRenderer {
 
     layout (location = 0) in vec3 positionIn;
 
-    layout (location = 1) in vec4 colorIn;
+    layout (location = 1) in mat4 lineTransformation;
+
+    layout (location = 5) in vec4 colorIn;
 
     uniform mat4 viewProjectionTransformation;
 
@@ -114,40 +228,11 @@ extension GLLineRenderer {
 
     void main() {
 
-        gl_Position = viewProjectionTransformation * vec4(positionIn, 1);
+        gl_Position = viewProjectionTransformation * lineTransformation * vec4(positionIn, 1);
 
         vs_out.color = colorIn;
     }
     """
-
-    /*private static let geometrySource = """
-    #version 330 core
-
-    layout (lines) in;
-
-    in VERTEX_OUT {
-
-        vec4 color;
-
-    } gs_in[];
-
-    layout (line_strip, max_vertices = 2) out;
-
-    out vec4 color;
-
-    void main() {
-
-        gl_Position = gl_in[0].gl_Position;
-        color = gs_in[0].color;
-        EmitVertex();
-
-        gl_Position = gl_in[1].gl_Position;
-        color = gs_in[1].color;
-        EmitVertex();
-
-        EndPrimitive();
-    }
-    """*/
 
     private static let fragmentSource = """
     #version 330 core

@@ -1,5 +1,6 @@
 import CustomGraphicsMath
 
+// TODO: maybe this is better defined as a SubStruct of Voxel
 public struct Vertex {
 
     public var position: DVec3

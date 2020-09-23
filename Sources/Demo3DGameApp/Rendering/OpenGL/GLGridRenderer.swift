@@ -12,7 +12,7 @@ public class GLGridRenderer {
         AxisConfig(direction: DVec3(0, 0, 1), crossDirection: DVec3(0, 1, 0), positiveLength: 20.0, negativeLength: 20.0, color: .Blue)
     ]
 
-    private var mainAxisLineThickness = 0.005
+    private var mainAxisLineThickness = 0.01
 
     private var gridLineThickness = 0.001
 
