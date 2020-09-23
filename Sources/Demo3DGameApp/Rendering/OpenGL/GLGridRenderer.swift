@@ -233,58 +233,7 @@ public class GLGridRenderer {
         glBindBuffer(GLMap.ARRAY_BUFFER, 0)
 
         lineRenderer.updateBuffers(lines: lines)
-
-        /*glBindBuffer(GLMap.ARRAY_BUFFER, vbo)
-
-        var vertices = [DVec3]()
-
-        let gridSize = 0.5
-
-        let axisWidth = 0.01
-
-        let gridWidth = 0.001
-
-        let axisConfigs = [
-
-            (direction: DVec3(1, 0, 0), positiveLength: 20.0, negativeLength: 20.0, color: Color.Red),
-
-            (direction: DVec3(0, 1, 0), positiveLength: 20.0, negativeLength: 20.0, color: .Green),
-
-            (direction: DVec3(0, 0, 1), positiveLength: 20.0, negativeLength: 20.0, color: .Blue)
-        ]
-
-        
-
-        let bufferData = vertices.flatMap { $0.elements.map(Float.init) }
-
-        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * bufferData.count, bufferData, GLMap.DYNAMIC_DRAW)
-
-        glBindBuffer(GLMap.ARRAY_BUFFER, 0)*/
     }
-
-    /*public func getLineVertices(from start: DVec3, to end: DVec3, orthogonalTo orthogonalDirection: DVec3, width: Double) -> [DVec3] {
-
-        let mainDirection = (start - end).normalized()
-
-        let crossDirection = mainDirection.cross(orthogonalDirection).normalized()
-
-        let vertices: [DVec3] = [
-
-            start - crossDirection * width,
-
-            end - crossDirection * width,
-
-            end + crossDirection * width,
-
-            start - crossDirection * width,
-
-            end + crossDirection * width,
-
-            start + crossDirection * width
-        ]
-
-        return vertices
-    }*/
 
     public func render(scene: Scene, context: GLRenderContext) {
 
@@ -298,36 +247,15 @@ public class GLGridRenderer {
 
             true,
 
-            context.viewTransformation.elements) /*context.projectionTransformation.matmul(context.cameraTransformation/*Matrix4([
-
-                1, 0, 0, scene.camera.position.x,
-
-                0, 1, 0, scene.camera.position.y,
-
-                0, 0, 1, scene.camera.position.z,
-
-                0, 0, 0, 1
-
-            ].map(Float.init))*/).elements)*/
-        
-        /*let orientationTransformation = Matrix4<Float>([
-
-            scene.camera.forward.x, 0, 0, 0,
-
-            scene.camera.forward.y, 1, 0, 0,
-
-            scene.camera.forward.z, 0, 1, 0,
-
-            0, 0, 0, 1
-
-        ].map(Float.init))
-
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "orientationTransformation"), 1, true, orientationTransformation.elements)*/
+            context.viewTransformation.elements)
 
 
         glBindVertexArray(vao)
 
         
+        // TODO: maybe abstract opengl state into a state manager and only call the functions that
+        // really change the state at any given time (avoid unnecessary calls if state is set to required value anyways)
+        glEnable(GLMap.DEPTH_TEST)
 
         glDrawArraysInstanced(GLMap.TRIANGLES, 0, GLMap.Size(vertices.count), GLMap.Size(lineCount))
 

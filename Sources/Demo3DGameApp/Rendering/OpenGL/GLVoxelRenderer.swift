@@ -202,39 +202,43 @@ public class GLVoxelRenderer {
 
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "viewTransformation"), 1, true, viewTransformation.elements)
 
+        var normalVoxelCount = 0
 
-        let instanceData = voxels.flatMap {
+        var normalInstanceData = [Float]()
 
-            $0.position.elements.map(Float.init) + [$0.highlighted ? Float(1) : Float(0)]
-        }
+        var highlightedVoxelCount = 0
+
+        var highlightedInstanceData = [Float]()
 
         for voxel in voxels {
 
             if voxel.highlighted {
 
-                print("HAVE HIGHLIGHTED VOXEL")
+                highlightedInstanceData.append(contentsOf: voxel.position.elements.map(Float.init) + [1])
+
+                highlightedVoxelCount += 1
+
+            } else {
+
+                normalInstanceData.append(contentsOf: voxel.position.elements.map(Float.init) + [0])
+
+                normalVoxelCount += 1
             }
         }
 
         instanceBuffer.bind(GLMap.ARRAY_BUFFER)
 
-        instanceBuffer.store(instanceData)
+        instanceBuffer.store(normalInstanceData)
 
-        /*let testData: [GLMap.Float] = [
+        glEnable(GLMap.DEPTH_TEST)
 
-            0, 0, 0, 0, 0, 0,
+        glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(normalVoxelCount))
 
-            1, 0, 0, 0, 0, 0,
+        instanceBuffer.store(highlightedInstanceData)
 
-            0, 1, 0, 0, 0, 0
-        ]
+        glDisable(GLMap.DEPTH_TEST)
 
-        glBufferData(GLMap.ARRAY_BUFFER, MemoryLayout<Float>.size * testData.count, testData, GLMap.STATIC_DRAW)
-
-        glDrawArrays(GLMap.TRIANGLES, 0, GLMap.Size(3))*/
-
-
-        glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(voxels.count))
+        glDrawElementsInstanced(GLMap.TRIANGLES, GLMap.Size(GLVoxelRenderer.indices.count), GLMap.UNSIGNED_INT, nil, GLMap.Size(highlightedVoxelCount))
 
         glBindVertexArray(0)
     }
@@ -283,8 +287,6 @@ extension GLVoxelRenderer {
         float highlighted;
 
     } vertexOut;
-
-    //in float Highlighted;
 
     out vec4 FragColor;
 
