@@ -4,7 +4,7 @@ import CustomGraphicsMath
 
 public class GLLineRenderer {
 
-    private var shaderProgram = ShaderProgram(
+    private var shaderProgram = GLShaderProgram(
 
         vertex: vertexSource,
         
@@ -85,39 +85,7 @@ public class GLLineRenderer {
 
             direction = direction.normalized()
 
-            var nonZeroComponent = 0
-
-            for i in 0..<direction.count {
-
-                if direction[i] != 0 {
-
-                    nonZeroComponent = i
-
-                    break
-                }
-            }
-
-            let otherComponents = [0, 1, 2].filter { $0 != nonZeroComponent }
-
-            //print("NON ZERO COMPONENT", direction, nonZeroComponent, otherComponents)
-
-            var crossDirection = DVec3(1, 1, 1)
-
-            crossDirection[nonZeroComponent] = otherComponents.reduce(into: 0, {
-
-                $0 -= direction[$1]
-
-            }) / direction[nonZeroComponent]
-
-            crossDirection = crossDirection.normalized()
-
-            print("DIRECTION", direction)
-
-            print("CROSS DIRECTION", crossDirection.elements)
-
-            let thirdDirection = crossDirection.cross(direction).normalized()
-
-            print("THIRD DIRECTION", thirdDirection.elements)
+            let (forwardDirection, rightDirection, upDirection) = GLCoordinateSystem.getPredictableAxisConfig(from: direction)
 
             var transformation = Matrix4([
 
@@ -133,31 +101,15 @@ public class GLLineRenderer {
 
             transformation = Matrix4([
 
-                direction.x, thirdDirection.x, crossDirection.x, 0,
+                direction.x, upDirection.x, rightDirection.x, 0,
 
-                direction.y, thirdDirection.y, crossDirection.y, 0, 
+                direction.y, upDirection.y, rightDirection.y, 0, 
 
-                direction.z, thirdDirection.z, crossDirection.z, 0,
+                direction.z, upDirection.z, rightDirection.z, 0,
 
                 0, 0, 0, 1
                 
             ].map(Float.init)).matmul(transformation)
-
-            /*transformation = Matrix4([
-
-                0, 0, 20, 0,
-
-                -0.7, 0.7, 0, 0,
-
-                0.7, 0.7, 0, 0,
-
-                0, 0, 0, 1
-
-            ]).transposed().matmul(transformation)*/
-
-            print("GOT TRANSFORMATION MATRIX", transformation.elements, direction.elements)
-
-            //print("WOULD RESULT IN", transformation.matmul(FVec4(-1, 0, -1, 1)).elements)
 
             let transformationResultStart = DVec3(transformation.matmul(FVec4(0.5, 0, 0, 1)).elements[0..<3].map(Double.init))
             
@@ -187,8 +139,6 @@ public class GLLineRenderer {
                 0, 0, 0, 1
 
             ].map(Float.init)).matmul(transformation)
-
-            // print("THE TRANSFORMATION MATIRXI OIS:", transformation.elements)
 
             instanceData.append(contentsOf: transformation.transposed().elements)
 
