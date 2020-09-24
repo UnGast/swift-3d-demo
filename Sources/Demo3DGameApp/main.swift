@@ -165,24 +165,33 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func frame(_ deltaTime: Int) {
 
-        let timeStep = Double(deltaTime) / 500
+        let timeStep: Double
 
-        if system.keyStates[.ArrowUp] {
+        if system.keyStates[.LeftShift] {
+
+            timeStep = Double(deltaTime) / 100
+
+        } else {
+
+            timeStep = Double(deltaTime) / 500
+        }
+
+        if system.keyStates[.ArrowUp] || system.keyStates[.W] {
 
             scene.camera.position -= scene.camera.forward * timeStep
         }
 
-        if system.keyStates[.ArrowDown] {
+        if system.keyStates[.ArrowDown] || system.keyStates[.S] {
 
             scene.camera.position += scene.camera.forward * timeStep
         }
         
-        if system.keyStates[.ArrowLeft] {
+        if system.keyStates[.ArrowLeft] || system.keyStates[.A] {
 
             scene.camera.position -= scene.camera.right * timeStep
         }
 
-        if system.keyStates[.ArrowRight] {
+        if system.keyStates[.ArrowRight] || system.keyStates[.D] {
 
             scene.camera.position += scene.camera.right * timeStep
         }
