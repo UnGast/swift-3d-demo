@@ -165,7 +165,7 @@ public class ThreeDGameApp: VisualApp<SDL2OpenGL3NanoVGSystem, SDL2OpenGL3NanoVG
 
     private func frame(_ deltaTime: Int) {
 
-        let timeStep = Double(deltaTime) / 1000
+        let timeStep = Double(deltaTime) / 500
 
         if system.keyStates[.ArrowUp] {
 

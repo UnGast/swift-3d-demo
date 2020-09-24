@@ -13,17 +13,17 @@ public class GLLineRenderer {
 
     private static let vertices: [Float] = [
 
-        -1, 0, 1,
+        -0.5, 0, 0.5,
 
-        1, 0, 1,
+        0.5, 0, 0.5,
 
-        1, 0, -1,
+        0.5, 0, -0.5,
 
-        -1, 0, 1,
+        -0.5, 0, 0.5,
 
-        1, 0, -1,
+        0.5, 0, -0.5,
 
-        -1, 0, -1
+        -0.5, 0, -0.5
     ]
 
     lazy private var vertexArray = buildVertexArray()
@@ -121,11 +121,11 @@ public class GLLineRenderer {
 
             var transformation = Matrix4([
 
-                Float(length) / 2, 0, 0, 0,
+                Float(length), 0, 0, 0,
 
                 0, 1, 0, 0,
 
-                0, 0, Float(line.thickness) / 2, 0,
+                0, 0, Float(line.thickness), 0,
 
                 0, 0, 0, 1
 
@@ -159,21 +159,34 @@ public class GLLineRenderer {
 
             //print("WOULD RESULT IN", transformation.matmul(FVec4(-1, 0, -1, 1)).elements)
 
-            let referenceTransformedStartPoint = DVec3(transformation.matmul(FVec4(1, 0, 0, 1)).elements[0..<3].map(Double.init))
+            let transformationResultStart = DVec3(transformation.matmul(FVec4(0.5, 0, 0, 1)).elements[0..<3].map(Double.init))
+            
+            let transformationResultEnd = DVec3(transformation.matmul(FVec4(-0.5, 0, 0, 1)).elements[0..<3].map(Double.init))
 
-            let translation = line.start - referenceTransformedStartPoint
+            let transformationResultDirection = (transformationResultEnd - transformationResultStart).normalized()
 
-            /*transformation = Matrix4([
+            let lineTranslation: DVec3
 
-                1, 0, 0, translation.x,
+            if transformationResultDirection.dot(direction) > 0 {
 
-                0, 1, 0, translation.y,
+                lineTranslation = line.start - transformationResultStart
 
-                0, 0, 1, translation.z,
+            } else {
+
+                lineTranslation = line.start - transformationResultEnd
+            }
+
+            transformation = Matrix4([
+
+                1, 0, 0, lineTranslation.x,
+
+                0, 1, 0, lineTranslation.y,
+
+                0, 0, 1, lineTranslation.z,
 
                 0, 0, 0, 1
 
-            ].map(Float.init)).matmul(transformation)*/
+            ].map(Float.init)).matmul(transformation)
 
             // print("THE TRANSFORMATION MATIRXI OIS:", transformation.elements)
 
