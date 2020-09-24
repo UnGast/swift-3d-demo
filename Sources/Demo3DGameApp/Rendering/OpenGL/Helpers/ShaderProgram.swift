@@ -1,6 +1,7 @@
 import GL
+import CustomGraphicsMath
 
-open class ShaderProgram {
+open class GLShaderProgram {
     
     public let vertexSource: String
     
@@ -8,7 +9,11 @@ open class ShaderProgram {
     
     public let fragmentSource: String
 
-    public var id: GLMap.UInt = 0
+    public private(set) var compiled = false
+
+    public private(set) var id: GLMap.UInt = 0
+
+    public private(set) var uniformLocations: [String: GLMap.Int] = [:]
 
     public init(vertex vertexSource: String, geometry geometrySource: String? = nil, fragment fragmentSource: String) {
 
@@ -77,6 +82,38 @@ open class ShaderProgram {
         glDeleteShader(vertexShader.handle)
 
         glDeleteShader(fragmentShader.handle)
+
+        compiled = true
+    }
+
+    open func getUniformLocation(_ name: String) -> GLMap.Int {
+
+        if !compiled {
+
+            fatalError("Cannot access uniforms before compilation.")
+        }
+
+        if let location = uniformLocations[name] {
+
+            return location
+
+        }
+
+        let location = glGetUniformLocation(self.id, name)
+
+        uniformLocations[name] = location
+
+        return location
+    }
+ 
+    open func setUniform(_ name: String, _ matrix: Matrix4<Float>, transpose: Bool = false) {
+
+        if !compiled {
+
+            fatalError("Cannot access uniforms before compilation.")
+        }
+
+        glUniformMatrix4fv(location: getUniformLocation(name), count: 1, transpose: transpose, value: matrix.elements)
     }
 
     open func use() {
@@ -90,7 +127,7 @@ open class ShaderProgram {
     }
 }
 
-extension ShaderProgram {
+extension GLShaderProgram {
 
     public struct LinkingError: Error {
 
