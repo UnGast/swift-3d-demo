@@ -96,7 +96,6 @@ public class GLLineRenderer {
                 0, 0, Float(line.thickness), 0,
 
                 0, 0, 0, 1
-
             ])
 
             transformation = Matrix4([

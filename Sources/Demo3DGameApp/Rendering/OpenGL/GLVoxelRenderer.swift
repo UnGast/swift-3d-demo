@@ -4,7 +4,7 @@ import CustomGraphicsMath
 
 public class GLVoxelRenderer {
 
-    private let shaderProgram = ShaderProgram(
+    private let shaderProgram = GLShaderProgram(
 
         vertex: GLVoxelRenderer.vertexSource,
         
