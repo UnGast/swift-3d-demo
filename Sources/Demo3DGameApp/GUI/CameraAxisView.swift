@@ -40,7 +40,7 @@ public class CameraAxisView: Widget {
 
         let center = globalBounds.center
 
-        let maxLength = globalBounds.size.width / 2
+        let maxLength = min(globalBounds.size.height / 2, globalBounds.size.width / 2)
 
         return RenderObject.RenderStyle(fillColor: .White) {
             
@@ -54,6 +54,6 @@ public class CameraAxisView: Widget {
 
     private func projectAxis(axis: DVec3, projectionTransformation: Matrix4<Double>) -> DVec2 {
         
-        DVec2(Array(projectionTransformation.matmul(Vector4(axis.elements + [1])).elements[0..<2]))
+        DVec2(Array(projectionTransformation.matmul(Vector4(axis.elements + [0])).elements[0..<2]))
     }
 }
